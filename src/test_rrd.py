@@ -24,10 +24,10 @@ DATE_END = datetime(year=2012,
                                 minute=0, 
                                 second=0).strftime("%s")
 
-DATE_START = db.get_last_record()
+DATE_START = db.get_date_last_record()
 DATE_END = datetime.now().strftime("%s")
 
-act_rrd = RRD (rrd_path = "/home/gustavo/AC/xo_stats", rrd_name="pippy.rrd", date_start=DATE_START, date_end=DATE_END)
+act_rrd = RRD (path = "/home/gustavo/AC/xo_stats", name="pippy.rrd", date_start=DATE_START, date_end=DATE_END)
 """
 act_rrd.show_valid_ds("uptime")
 act_rrd.show_valid_ds("resumed")

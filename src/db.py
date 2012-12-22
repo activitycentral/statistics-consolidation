@@ -9,30 +9,30 @@ class DB_Stats:
 	TABLES['Usages'] = (
 		"CREATE TABLE `Usages` (" 
 		"	`ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," 
-		"	`user_id` INTEGER NOT NULL," 
-		"	`resource_id` INTEGER NOT NULL," 
+		"	`user_hash` CHAR(40) NOT NULL," 
+		"	`resource_name` CHAR(80)," 
 		"	`start_date` TIMESTAMP NOT NULL," 
 		"	`data_type` CHAR (30) NOT NULL,"
 		"	`data` INTEGER NOT NULL,"
-		"	PRIMARY KEY (`start_date`,`resource_id`, `data_type`)"
+		"	PRIMARY KEY (`start_date`,`resource_name`, `data_type`)"
 		"	)")
 
 	TABLES['Resources'] = (
 		"CREATE TABLE Resources ("
-		"	`id` INTEGER auto_increment unique,"	
 		"	`name` CHAR(250),"
 		"	PRIMARY KEY (name)"
 		"	)")
 
 	TABLES['Users'] = (
 		"CREATE TABLE Users("
-		"	`id` INTEGER auto_increment unique,"	
+                "       `hash` CHAR (40) NOT NULL,"	
+		"       `uuid` CHAR (32) NOT NULL,"
 		"	`machine_sn` CHAR(80),"
 		"	`age` INTEGER NOT NULL,"
 		"	`school` CHAR(80),"
 		"	`sw_version` CHAR (80),"
 		"	`ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,"
-		"	PRIMARY KEY (machine_sn)"
+		"	PRIMARY KEY (hash)"
 		"	)")
 
 	TABLES['Runs'] = (
@@ -96,20 +96,24 @@ class DB_Stats:
 
 
 	def store_activity_uptime(self, rrd, data):
+		""" 
+		FIXME: improving, saving all data int rrd object 
+		"""
 		cursor = self.cnx.cursor()
 		insert = ("INSERT INTO Usages " 
-				"(user_id, "
-				"resource_id, "
+				"(user_hash, "
+				"resource_name, "
 				"start_date, "
 				"data_type, "
 				"data) "
 				"VALUES (%s, %s, %s, %s ,%s) ")
-		print ("store_activity_uptime: {}".format(self.get_resource_id(data['resource_name'])))
-		info = ('none', self.get_resource_id(data['resource_name']), datetime.fromtimestamp(float(data['date_start'])), 'uptime', data['data'])	
+
+
+		info = ('none', data['resource_name'], datetime.fromtimestamp(float(data['date_start'])), 'uptime', data['data'])	
 		
 		try:
 			cursor.execute(insert, info)
-			if self.update_last_record(rrd.get_last_record()) == 0:	
+			if self.update_last_record(rrd.get_date_last_record()) == 0:	
 				self.cnx.commit()
 
 		except mysql.connector.Error as err:
@@ -119,7 +123,7 @@ class DB_Stats:
 
 	def get_resource_id(self, resource_name):
 		cursor = self.cnx.cursor()
-		op = ("SELECT id FROM Resources WHERE name = %s")
+		op = ("SELECT name FROM Resources WHERE name = %s")
 		params = (resource_name,)
 		try:	
 			cursor.execute(op, params)
@@ -168,7 +172,7 @@ class DB_Stats:
 
                 cursor.close()
 		return res
-	def get_last_record (self):
+	def get_date_last_record (self):
 		cursor = self.cnx.cursor()
                 op = ("SELECT UNIX_TIMESTAMP ((SELECT last_ts FROM Runs))")
                 try:

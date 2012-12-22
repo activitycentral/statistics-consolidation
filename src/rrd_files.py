@@ -1,4 +1,5 @@
 import rrdtool
+import os
 
 
 class RRD:
@@ -8,25 +9,28 @@ class RRD:
 	data_item = 2
 	DS = {'active':0, 'buddies':0, 'instances':0, 'new':0, 'resumed':0, 'uptime':0}
 
-	def __init__(self, rrd_path, rrd_name, date_start, date_end):
+	def __init__(self, path, name, date_start, date_end):
 
-		self.rrd_name = rrd_name
+		self.rrd_name = name
 
 		if date_start == None:
-			self.date_start = str(rrdtool.first(rrd_path +"/"+ rrd_name))
+			self.date_start = str(rrdtool.first(str(os.path.join (path,name))))
 		else:
 			self.date_start = str(date_start)
 			
 
-		if date_end == 0:
-			self.date_end = str(rrdtool.last(rrd_path +"/"+ rrd_name))
+		if date_end == None:
+			self.date_end = str(rrdtool.last(str(os.path.join(path,name))))
 		else:
 			self.date_end   = str(date_end)
-
+		print "******************************************"
 		print "start: " + self.date_start
-		print "end: " + self.date_end
-						
-		self.rrd = rrdtool.fetch (rrd_path +"/"+ rrd_name, 'AVERAGE', '-r 60', '-s '+ self.date_start, '-e '+self.date_end)
+		print "end: "  + self.date_end
+		print "PATH: " + path
+		print "RRD NAME: " + name
+		print "******************************************"
+					
+		self.rrd = rrdtool.fetch (str(os.path.join(path,name)), 'AVERAGE', '-r 60', '-s '+ self.date_start, '-e '+self.date_end)
 
 		for item in self.DS.keys():
 			idx = self.get_ds_index (item)
@@ -87,3 +91,7 @@ class RRD:
 
 	def get_last_record(self):
 		return self.date_end
+
+	def set_user_hash(self, u_hash):
+		self.user_hash = u_hash
+
