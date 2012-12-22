@@ -52,6 +52,7 @@ class RRD:
 	def get_uptime_by_interval (self):
 		ds_name = "uptime"
 		res=list()
+	
 		print "------------------- Calcule "+ ds_name +"---------------------"
 		i=0
 		found = False
@@ -89,7 +90,7 @@ class RRD:
 		print "---------------------------------------------------"
 
 
-	def get_last_record(self):
+	def get_date_last_record(self):
 		return self.date_end
 
 	def set_user_hash(self, u_hash):

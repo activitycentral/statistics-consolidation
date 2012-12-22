@@ -95,10 +95,10 @@ class DB_Stats:
 
 
 
-	def store_activity_uptime(self, rrd, data):
-		""" 
-		FIXME: improving, saving all data int rrd object 
-		"""
+	def store_activity_uptime(self, rrd):
+		
+		self.store_resource(rrd.get_name())
+	
 		cursor = self.cnx.cursor()
 		insert = ("INSERT INTO Usages " 
 				"(user_hash, "
@@ -108,20 +108,19 @@ class DB_Stats:
 				"data) "
 				"VALUES (%s, %s, %s, %s ,%s) ")
 
+		for d in rrd.get_uptime_by_interval():
+			info = ('none', rrd.get_name() , datetime.fromtimestamp(float(d[0])), 'uptime', d[1])	
+			try:
+				cursor.execute(insert, info)
+				if self.update_last_record(rrd.get_date_last_record()) == 0:	
+					self.cnx.commit()
 
-		info = ('none', data['resource_name'], datetime.fromtimestamp(float(data['date_start'])), 'uptime', data['data'])	
-		
-		try:
-			cursor.execute(insert, info)
-			if self.update_last_record(rrd.get_date_last_record()) == 0:	
-				self.cnx.commit()
-
-		except mysql.connector.Error as err:
-			print("Fail INSERT: {}".format(err))
+			except mysql.connector.Error as err:
+				print("Fail INSERT: {}".format(err))
 		
 		cursor.close()
 
-	def get_resource_id(self, resource_name):
+	def store_resource(self, resource_name):
 		cursor = self.cnx.cursor()
 		op = ("SELECT name FROM Resources WHERE name = %s")
 		params = (resource_name,)
@@ -129,16 +128,12 @@ class DB_Stats:
 			cursor.execute(op, params)
 			result = cursor.fetchone()
 			if result != None:
-				print ("result is not None: {}".format(result))
-				return result[0]
+				print("Resource {} already in db".format(resource_name))
 			else:
-				print ("result is None")
 				insert = ("INSERT INTO Resources (name) VALUES (%s)")
 				info = (resource_name, )
 				cursor.execute(insert, info)
 				self.cnx.commit()
-				""" TODO: return ID instead call recursevily """
-				self.get_resource_id(resource_name)
 		except mysql.connector.Error as err:
 			print("Fail SELCT: {}".format(err))
 
@@ -172,6 +167,7 @@ class DB_Stats:
 
                 cursor.close()
 		return res
+
 	def get_date_last_record (self):
 		cursor = self.cnx.cursor()
                 op = ("SELECT UNIX_TIMESTAMP ((SELECT last_ts FROM Runs))")
@@ -179,7 +175,7 @@ class DB_Stats:
                         cursor.execute(op)
 			result = cursor.fetchone()
 			if result != None:
-				print ("last rec: {}".format(result[0]))
+				print ("last record: {}".format(result[0]))
                                 return result[0]
                         else:
                                 print ("result is None")
