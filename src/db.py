@@ -14,7 +14,7 @@ class DB_Stats:
 		"	`start_date` TIMESTAMP NOT NULL," 
 		"	`data_type` CHAR (30) NOT NULL,"
 		"	`data` INTEGER NOT NULL,"
-		"	PRIMARY KEY (`start_date`,`resource_name`, `data_type`)"
+		"	PRIMARY KEY (`user_hash`,`start_date`,`resource_name`, `data_type`)"
 		"	)")
 
 	TABLES['Resources'] = (
@@ -98,7 +98,8 @@ class DB_Stats:
 	def store_activity_uptime(self, rrd):
 		
 		self.store_resource(rrd.get_name())
-	
+		self.store_user(rrd)
+		
 		cursor = self.cnx.cursor()
 		insert = ("INSERT INTO Usages " 
 				"(user_hash, "
@@ -109,16 +110,16 @@ class DB_Stats:
 				"VALUES (%s, %s, %s, %s ,%s) ")
 
 		for d in rrd.get_uptime_by_interval():
-			info = ('none', rrd.get_name() , datetime.fromtimestamp(float(d[0])), 'uptime', d[1])	
+			info = (rrd.get_user_hash(), rrd.get_name() , datetime.fromtimestamp(float(d[0])), 'uptime', d[1])	
 			try:
 				cursor.execute(insert, info)
 				if self.update_last_record(rrd.get_date_last_record()) == 0:	
 					self.cnx.commit()
 
 			except mysql.connector.Error as err:
-				print("Fail INSERT: {}".format(err))
-		
+                        	print("Fail {}: {}".format(cursor.statement, err))
 		cursor.close()
+	
 
 	def store_resource(self, resource_name):
 		cursor = self.cnx.cursor()
@@ -135,9 +136,31 @@ class DB_Stats:
 				cursor.execute(insert, info)
 				self.cnx.commit()
 		except mysql.connector.Error as err:
-			print("Fail SELCT: {}".format(err))
+                        print("Fail {}: {}".format(cursor.statement, err))
 
 		cursor.close()
+
+	def store_user (self, rrd):
+		cursor = self.cnx.cursor()
+                op = ("SELECT hash FROM Users WHERE hash = %s")
+                params = (rrd.get_user_hash(), )
+                try:    
+                        cursor.execute(op, params)
+                        result = cursor.fetchone()
+                        if result != None:
+                                print("User {} already in db".format(rrd.user_hash))
+                        else:
+				"""FIXME change hardcoded values """
+                                insert = ("INSERT INTO Users (hash, uuid, machine_sn, age, school, sw_version) VALUES (%s, %s, %s, %s, %s, %s)")
+                		params = (rrd.get_user_hash(), rrd.get_uuid(), "unk_machine_sn", 0, "unk_escuela", "1.0.0")
+                                cursor.execute(insert, params)
+                                self.cnx.commit()
+                except mysql.connector.Error as err:
+                        print("Fail {}: {}".format(cursor.statement, err))
+
+                cursor.close()
+
+
 
 	def update_last_record (self, ts):
 		cursor = self.cnx.cursor()
@@ -149,17 +172,13 @@ class DB_Stats:
 			result = cursor.fetchone()
 
 			if result != None:
-				print("will update ..")
 				op = ("UPDATE Runs SET last_ts = %s")
                 		cursor.execute(op, params)
 				self.cnx.commit()
-				print("update ok")
 			else:
-				print("will insert ..")
 				op = ("INSERT INTO Runs VALUES(%s)")
 				cursor.execute(op, params)
 				self.cnx.commit()
-				print("insert ok")
 
                 except mysql.connector.Error as err:
                         print("Fail {}: {}".format(cursor.statement, err))
@@ -178,8 +197,8 @@ class DB_Stats:
 				print ("last record: {}".format(result[0]))
                                 return result[0]
                         else:
-                                print ("result is None")
+                                print ("Last date record is None")
 				return 0
                 except mysql.connector.Error as err:
-                        print("Fail SELELCT: {}".format(err))
+                        print("Fail {}: {}".format(cursor.statement, err))
                 cursor.close()

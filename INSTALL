@@ -1,0 +1,12 @@
+Install Instructions
+====================
+
+1) Run: python setup.py install
+
+2) Configure the following entry on crontab:
+For example:
+To run every day at 3 AM hs
+
+0 3 * * *	root path_to_consolidation --db_user=root --db_pass=my_pass db_name=statistics /home/ceibal/sugar-stats/rrd
+
+

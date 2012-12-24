@@ -1,6 +1,6 @@
 import rrdtool
 import os
-
+import sys
 
 class RRD:
 
@@ -20,26 +20,44 @@ class RRD:
 			
 
 		if date_end == None:
-			self.date_end = str(rrdtool.last(str(os.path.join(path,name))))
+			self.date_end = str(rrdtool.last(str(os.path.join(path, name))))
 		else:
 			self.date_end   = str(date_end)
-		print "******************************************"
+		
+		self.user_hash = os.path.split(path)[1]
+		
+		self.user_path = os.path.join (
+					self.get_first_part_path(path, 3),
+					"users",
+					"user",
+					self.user_hash[:2],
+					self.user_hash
+					)
+			
+		self.uuid = self.get_uuid_from_file(self.user_path) 
+
+
+		print "*******************************************"
+		print "                  RRD                      "
 		print "start: " + self.date_start
 		print "end: "  + self.date_end
 		print "PATH: " + path
 		print "RRD NAME: " + name
-		print "******************************************"
-					
-		self.rrd = rrdtool.fetch (str(os.path.join(path,name)), 'AVERAGE', '-r 60', '-s '+ self.date_start, '-e '+self.date_end)
+		print "\n"
+		try:
+			self.rrd = rrdtool.fetch (str(os.path.join(path,name)), 'AVERAGE', '-r 60', '-s '+ self.date_start, '-e '+self.date_end)
+		except:
+			raise
 
+		print "                   DS                       "			
 		for item in self.DS.keys():
 			idx = self.get_ds_index (item)
 			if idx != -1:
 				self.DS[item] = idx
-				print item + ": " + str(self.DS[item])
+				print "DS "+ item + ": " + str(self.DS[item])
 			else:
-				print item + " not found in header"
-
+				print "DS "+ item + " not found in header"
+		print "***********************************************"
 
 	def get_ds_index(self, ds): 
 		i=0
@@ -53,7 +71,7 @@ class RRD:
 		ds_name = "uptime"
 		res=list()
 	
-		print "------------------- Calcule "+ ds_name +"---------------------"
+		print "-------Calcule "+ ds_name +"-------"
 		i=0
 		found = False
 		while i < len(self.rrd[self.data_item]):
@@ -67,7 +85,8 @@ class RRD:
 			else:
 				if found:
 					print start + "->" + end + ": " + uptime
-					res.append((start, uptime))
+					if float(uptime) > 0:
+						res.append((start, uptime))
 					found = False
 			i=i+1
 		return res
@@ -96,3 +115,19 @@ class RRD:
 	def set_user_hash(self, u_hash):
 		self.user_hash = u_hash
 
+	def get_first_part_path (self, path, idx):
+                l=list()
+                l.append(path)
+                for i in range (idx):
+                        l.append(os.path.split(l[i])[0])
+                return l[idx]
+
+	def get_uuid_from_file(self,path):
+		return open (os.path.join(path, "machine_uuid")).next()
+
+		
+	def get_user_hash(self):
+		return self.user_hash
+
+	def get_uuid (self):
+		return self.uuid
