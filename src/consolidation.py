@@ -1,6 +1,7 @@
 import os
 import rrd_files
 import db
+import argparse
 
 from rrd_files import *
 from db import *
@@ -30,4 +31,5 @@ class Consolidation:
 					print "None hash user found on: " + os.path.join(self.base_path, id_hash)	
 		else:
 			print "None hash ids  found on: " + self.base_path
+
 						

@@ -53,8 +53,7 @@ class DB_Stats:
 			cursor.execute(
 			"CREATE DATABASE {} DEFAULT CHARACTER SET 'utf8'".format(self.db_name))
 		except mysql.connector.Error as err:
-			print("Failed creating database: {}".format(err))
-			exit(1)
+			raise Exception ("Failed creating database: {}".format(err))
 	
 	def create_tables(self, cursor):
 		for name, ddl in self.TABLES.iteritems():
@@ -65,12 +64,12 @@ class DB_Stats:
 				if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
 			    		print("already exists.")
 				else:
-			    		print("Error: {}".format(err))
+			    		raise Exception ("Error: {}".format(err))
 		    	else:
 				print("OK")
 
 	def create (self):
-		self.cnx = mysql.connector.connect(user='root', password='gustavo')
+		self.cnx = mysql.connector.connect(user=self.user, password=self.password)
 		cursor = self.cnx.cursor()
 		"""Try connect to db """
 		try:
@@ -84,8 +83,7 @@ class DB_Stats:
 		    		self.cnx.database = self.db_name
 				self.create_tables(cursor)
 		    	else:
-				print("Error: {}".format(err))
-				exit(1)
+				raise Exception ("Error: {}".format(err))
 		cursor.close()
 	
 			
