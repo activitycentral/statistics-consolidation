@@ -16,12 +16,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import print_function
 
-
 import argparse
-import consolidation
-import db
-from consolidation import *
-from db import *
+from stats_consolidation.db import *
+from stats_consolidation.rrd_files import *
+from stats_consolidation.consolidation import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--db_user',required=True)
@@ -32,18 +30,23 @@ parser.add_argument('--log_path',required=True)
 
 args = parser.parse_args()
 
-
+"""
 try:
 	db = DB_Stats (args.db_name, args.db_user, args.db_pass)
 	db.create()
 except Exception as e:
-	print ("Creating DB: {}".format (e.msg))
-	exit(1)
+	print ("Creating DB: {}".format (str(e)
 
 
 try:
 	con = Consolidation(args.rrd_path, db)
 	con.process_rrds()
 except Exception as e:
-	print ("Processing rrd file: {}".format(e.msg))
+	print ("Processing rrd file: {}".format(str(e)
+"""
+db = DB_Stats (args.db_name, args.db_user, args.db_pass)
+db.create()
 
+
+con = Consolidation(args.rrd_path, db)
+con.process_rrds()
