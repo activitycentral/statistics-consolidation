@@ -7,6 +7,6 @@ Install Instructions
 For example:
 To run every day at 3 AM hs
 
-0 3 * * *	root path_to_consolidation --db_user=root --db_pass=my_pass db_name=statistics /home/ceibal/sugar-stats/rrd
+0 3 * * *	root consolidation_run --db_user=root --db_pass=my_pass db_name=statistics rrd_path=/home/ceibal/sugar-stats/rrd log_path=/var/log
 
 

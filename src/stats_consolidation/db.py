@@ -208,7 +208,6 @@ class DB_Stats:
 
 
 	def connect (self):
-		print ("Try connect to db")
 		try:
 			self.cnx = mysql.connector.connect(user=self.user, password=self.password)
 			cursor = self.cnx.cursor()
