@@ -90,6 +90,7 @@ class DB_Stats:
 				raise Exception ("Error: {}".format(err))
 		cursor.close()
 	
+	
 			
 		
 	def close (self):
@@ -204,3 +205,50 @@ class DB_Stats:
                 except mysql.connector.Error as err:
                         print("Fail {}: {}".format(cursor.statement, err))
                 cursor.close()
+
+
+	def connect (self):
+		print ("Try connect to db")
+		try:
+			self.cnx = mysql.connector.connect(user=self.user, password=self.password)
+			cursor = self.cnx.cursor()
+		    	self.cnx.database = self.db_name
+			cursor.close()
+		except mysql.connector.Error as err:
+			print("CONNECT FAIL {}".format (err))
+	
+	def most_activity_used (self):
+		uptime_last=0
+                try:
+			cursor1 = self.cnx.cursor()
+			cursor2 = self.cnx.cursor()
+                       	cursor1.execute("SELECT name FROM Resources")
+			
+			rows = cursor1.fetchall()
+			for name in rows:
+				if (name[0] != 'system') and (name[0] != 'journal') and (name[0] != 'network') and (name[0] != 'shell'):
+					cursor2.execute ("SELECT SUM(data) FROM Usages WHERE resource_name = %s", (name[0],))
+					uptime = cursor2.fetchone()
+					if uptime[0] > uptime_last:
+						uptime_last= uptime[0]
+						activity_name = name[0]
+                except mysql.connector.Error as err:
+			print("Fail {}:".format(err))
+		except:
+                        print("most_activity_used Fail ")
+
+                cursor1.close()
+                cursor2.close()
+		return (activity_name, uptime_last)
+
+	def frequency_usage(self):
+		cursor = self.cnx.cursor()
+                try:
+			cursor.execute("SELECT SUM(data) FROM Usages WHERE resource_name = system")
+			res = cursor.fetchone()
+		except mysql.connector.Error as err:
+                        print("ferquency_usage")
+		cursor.close()	
+
+		return res
+	

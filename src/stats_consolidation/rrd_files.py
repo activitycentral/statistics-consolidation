@@ -47,7 +47,7 @@ class RRD:
 		try:
 			self.rrd = rrdtool.fetch (str(os.path.join(path,name)), 'AVERAGE', '-r 60', '-s '+ self.date_start, '-e '+self.date_end)
 		except:
-			raise
+			raise Exception("rrdtool.fetch FAIL")
 
 		print "                   DS                       "			
 		for item in self.DS.keys():

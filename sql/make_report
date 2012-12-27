@@ -18,29 +18,30 @@ from __future__ import print_function
 
 import argparse
 from stats_consolidation.db import *
-from stats_consolidation.rrd_files import *
-from stats_consolidation.consolidation import *
-
+import sys
 parser = argparse.ArgumentParser()
+parser.add_argument('--query',required=True)
+parser.add_argument('--start_date',required=True)
+parser.add_argument('--end_date',required=True)
+parser.add_argument('--db_name',required=True)
 parser.add_argument('--db_user',required=True)
 parser.add_argument('--db_pass',required=True)
-parser.add_argument('--db_name',required=True)
-parser.add_argument('--rrd_path',required=True)
-parser.add_argument('--log_path',required=True)
 
 args = parser.parse_args()
 
-try:
-	db = DB_Stats (args.db_name, args.db_user, args.db_pass)
-	db.create()
-except Exception as e:
-	print ("Creating DB: {}".format (str(e)))
 
+"""try:"""
+re = DB_Stats (args.db_name, args.db_user, args.db_pass)
+re.connect()
+if args.query == 'activity_most_used':
+	activity = re.most_activity_used();
+	print ("**************************************************************************************************************")
+	print ("THE MOST USED ACTIVITY: {}, TIME: {} hrs / {} mins / {} secs".format(activity[0], activity[1]/60/60, activity[1]/60, activity[1]))
+	print ("***************************************************************************************************************")
 
-try:
-	con = Consolidation(args.rrd_path, db)
-	con.process_rrds()
-except Exception as e:
-	print ("Processing rrd file: {}".format(str(e)))
-
-
+if args.query == 'frequency_usage':
+	fres = re.frequency_usage();
+	print("Frequency usage: {}".format(fres))
+"""
+print ("Error: {}".format(sys.exc_info()[0]))
+"""
