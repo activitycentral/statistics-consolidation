@@ -217,17 +217,22 @@ class DB_Stats:
 		except mysql.connector.Error as err:
 			print("CONNECT FAIL {}".format (err))
 	
-	def most_activity_used (self):
+	def most_activity_used (self, start, end):
 		uptime_last=0
+		activity_name=''
                 try:
 			cursor1 = self.cnx.cursor()
 			cursor2 = self.cnx.cursor()
                        	cursor1.execute("SELECT name FROM Resources")
-			
+
+			ts_start = datetime.strptime(start, "%Y-%m-%d")
+        		ts_end   = datetime.strptime(end, "%Y-%m-%d")
+
 			rows = cursor1.fetchall()
 			for name in rows:
 				if (name[0] != 'system') and (name[0] != 'journal') and (name[0] != 'network') and (name[0] != 'shell'):
-					cursor2.execute ("SELECT SUM(data) FROM Usages WHERE resource_name = %s", (name[0],))
+					cursor2.execute ("SELECT SUM(data) FROM Usages WHERE (resource_name = %s) AND (start_date > %s) AND (start_date < %s)", 
+							(name[0],ts_start, ts_end))
 					uptime = cursor2.fetchone()
 					if uptime[0] > uptime_last:
 						uptime_last= uptime[0]
@@ -241,14 +246,17 @@ class DB_Stats:
                 cursor2.close()
 		return (activity_name, uptime_last)
 
-	def frequency_usage(self):
+	def frequency_usage(self, start, end):
 		cursor = self.cnx.cursor()
                 try:
-			cursor.execute("SELECT SUM(data) FROM Usages WHERE resource_name = system")
+			ts_start = datetime.strptime(start, "%Y-%m-%d")
+        		ts_end   = datetime.strptime(end, "%Y-%m-%d")
+			cursor.execute("SELECT SUM(data) FROM Usages WHERE (resource_name = 'system') AND (start_date > %s) AND (start_date < %s)",
+					(ts_start, ts_end))
 			res = cursor.fetchone()
+			return res[0]
 		except mysql.connector.Error as err:
-                        print("ferquency_usage")
+                        print("Fail {}: {}".format(cursor.statement, err))
 		cursor.close()	
 
-		return res
 	
