@@ -1,6 +1,7 @@
 import rrdtool
 import os
 import sys
+from datetime import datetime
 
 class RRD:
 
@@ -9,7 +10,7 @@ class RRD:
 	data_item = 2
 	DS = {'active':0, 'buddies':0, 'instances':0, 'new':0, 'resumed':0, 'uptime':0}
 
-	def __init__(self, path, name, date_start, date_end):
+	def __init__(self, path, name, date_start=None, date_end=None):
 
 		self.rrd_name = name
 
@@ -33,9 +34,9 @@ class RRD:
 					self.user_hash[:2],
 					self.user_hash
 					)
-			
+	        """		
 		self.uuid = self.get_uuid_from_file(self.user_path) 
-
+		"""	
 
 		print "*******************************************"
 		print "                  RRD                      "
@@ -67,32 +68,40 @@ class RRD:
 			i=+1
 		return -1
 
-	def get_uptime_by_interval (self):
-		ds_name = "uptime"
+	"""
+	Find several valid record consecutives, the last one is time of the interval.
+	Return: a list (start_time, total_time)
+	"""
+	def get_last_value_by_interval (self, ds_name):
 		res=list()
-	
+
 		print "-------Calcule "+ ds_name +"-------"
 		i=0
 		found = False
 		while i < len(self.rrd[self.data_item]):
 			value     = str(self.rrd[self.data_item][i][self.DS[ds_name]])
-			if value != "None":
+			if value != "None" and float (value) > 0  :
 				uptime = value
-				end    = str (long(self.date_start) + ((i+1) * 60))
+				end    = long(self.date_start) + ((i+1) * 60)
 				if found == False:
 					found = True
-					start = str (long (self.date_start) + ((i+1) * 60))
+					start = long (self.date_start) + ((i+1) * 60)
 			else:
 				if found:
-					print start + "->" + end + ": " + uptime
+					print str(datetime.fromtimestamp(float(start))) + " -> " + str(datetime.fromtimestamp(float(end))) + ": " + uptime
 					if float(uptime) > 0:
 						res.append((start, uptime))
 					found = False
 			i=i+1
 		return res
 		print "---------------------------------------------------"
+	
+	def get_active_by_interval (self):
+		return self.get_last_value_by_interval ("active")
 
-
+	def get_uptime_by_interval (self):
+		return self.get_last_value_by_interval ("uptime")
+	
 	def get_name(self):
 		return self.rrd_name.partition(".rrd")[0]
 
