@@ -74,24 +74,26 @@ class RRD:
 	"""
 	def get_last_value_by_interval (self, ds_name):
 		res=list()
-
-		print "-------Calcule "+ ds_name +"-------"
+		prev_value = 0.0
 		i=0
 		found = False
+
+		print "-------Calcule "+ ds_name +"-------"
 		while i < len(self.rrd[self.data_item]):
-			value     = str(self.rrd[self.data_item][i][self.DS[ds_name]])
-			if value != "None" and float (value) > 0  :
-				uptime = value
+			value  = str(self.rrd[self.data_item][i][self.DS[ds_name]])
+
+			if (value != "None") and (float(value) > 0)  and (float(value) > float(prev_value)):
+				prev_value = value
 				end    = long(self.date_start) + ((i+1) * 60)
 				if found == False:
 					found = True
 					start = long (self.date_start) + ((i+1) * 60)
 			else:
 				if found:
-					print str(datetime.fromtimestamp(float(start))) + " -> " + str(datetime.fromtimestamp(float(end))) + ": " + uptime
-					if float(uptime) > 0:
-						res.append((start, uptime))
+					print str(datetime.fromtimestamp(float(start))) + " -> " + str(datetime.fromtimestamp(float(end))) + ": " + prev_value
+					res.append((start, prev_value))
 					found = False
+					prev_value = 0.0
 			i=i+1
 		return res
 		print "---------------------------------------------------"
@@ -113,7 +115,7 @@ class RRD:
 			value     = str (self.rrd[self.data_item][i][self.DS[ds_name]])
 	
 			if value != "None":
-				print timestamp+ ": " + value
+				print str(datetime.fromtimestamp(float(timestamp))) + " (" + timestamp + ")" + ": " + value
 			i=i+1
 		print "---------------------------------------------------"
 
