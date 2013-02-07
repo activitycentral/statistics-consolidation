@@ -82,22 +82,24 @@ class RRD:
 		while i < len(self.rrd[self.data_item]):
 			value  = str(self.rrd[self.data_item][i][self.DS[ds_name]])
 
-			if (value != "None") and (float(value) > 0)  and (float(value) > float(prev_value)):
+			if (value != "None") and (float(value) > 0)  and (float(value) >= float(prev_value)):
 				prev_value = value
-				end    = long(self.date_start) + ((i+1) * 60)
+				end = long(self.date_start) + ((i+1) * 60)
 				if found == False:
 					found = True
 					start = long (self.date_start) + ((i+1) * 60)
 			else:
 				if found:
-					print str(datetime.fromtimestamp(float(start))) + " -> " + str(datetime.fromtimestamp(float(end))) + ": " + prev_value
-					res.append((start, prev_value))
-					found = False
-					prev_value = 0.0
+					if self.verify_interrupt(i, ds_name, prev_value):
+						print str(datetime.fromtimestamp(float(start))) + " -> " + str(datetime.fromtimestamp(float(end))) + ": " + prev_value
+						res.append((start, prev_value))
+						found = False
+						prev_value = 0.0
 			i=i+1
 		return res
 		print "---------------------------------------------------"
-	
+
+
 	def get_active_by_interval (self):
 		return self.get_last_value_by_interval ("active")
 
@@ -142,3 +144,28 @@ class RRD:
 
 	def get_uuid (self):
 		return self.uuid
+
+	"""
+	For some reason, sometimes for a while activity is running, statistics library register several values as None.
+	To detect this behavoir, this function look-up over next records time, and verify if the value is grater than
+	last valid value + (interval_numb * 60). If the value es greater, means the activity still running else 
+        the activity was stopped and starting again. 
+	"""
+	def verify_interrupt(self, idx, ds_name, prev_value):
+		i = idx
+		j = 0
+		while i < len(self.rrd[self.data_item]):
+			value  = str(self.rrd[self.data_item][i][self.DS[ds_name]])
+			if value != "None":
+				"""
+				print "["+str(j)+ "] current value: " + value + " prev value: " +  str (float (prev_value) + (60 * j)) + " ("+ prev_value+")"
+				"""
+				if float(value) > (float (prev_value) + (60 * j)):
+					return False
+				else:
+					return True
+			i=i+1
+			j=j+1
+
+		return True
+	

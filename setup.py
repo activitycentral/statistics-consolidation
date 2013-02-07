@@ -8,8 +8,8 @@ setup(
     author_email = "gduarte@activitycentral.com",
     url = "http://www.acrtivitycentral.com/",
     packages=[
-        'stats_consolidation',
+        'sugar-stats-consolidation',
     ],
-    package_dir={'': 'src'}
+    package_dir={'': 'stats_consolidation'}
 )
 
