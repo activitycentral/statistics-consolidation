@@ -18,12 +18,14 @@ class RRD:
 			self.date_start = str(rrdtool.first(str(os.path.join (path,name))))
 		else:
 			self.date_start = str(date_start)
-			
 
 		if date_end == None:
 			self.date_end = str(rrdtool.last(str(os.path.join(path, name))))
 		else:
 			self.date_end   = str(date_end)
+
+		if self.date_start > self.date_end:
+			raise Exception("No data available on rrd, from {0} to {1}".format( str(datetime.fromtimestamp(float(self.date_start))), str(datetime.fromtimestamp(float(self.date_end)))))
 		
 		self.user_hash = os.path.split(path)[1]
 		
@@ -36,19 +38,20 @@ class RRD:
 					)
 	        """		
 		self.uuid = self.get_uuid_from_file(self.user_path) 
-		"""	
+		"""
+		self.uuid = "for_tesing"	
 
 		print "*******************************************"
-		print "                  RRD                      "
-		print "start: " + self.date_start
-		print "end: "  + self.date_end
+		print "     creating a RRD instance               "
+		print "start: " + str(datetime.fromtimestamp(float(self.date_start)))
+		print "end: "  + str(datetime.fromtimestamp(float(self.date_end)))
 		print "PATH: " + path
 		print "RRD NAME: " + name
 		print "\n"
 		try:
 			self.rrd = rrdtool.fetch (str(os.path.join(path,name)), 'AVERAGE', '-r 60', '-s '+ self.date_start, '-e '+self.date_end)
 		except:
-			raise Exception("rrdtool.fetch FAIL")
+			raise Exception("rrdtool.fetch FAIL, from {0} to {1}".format( str(datetime.fromtimestamp(float(self.date_start))), str(datetime.fromtimestamp(float(self.date_end)))))
 
 		print "                   DS                       "			
 		for item in self.DS.keys():
