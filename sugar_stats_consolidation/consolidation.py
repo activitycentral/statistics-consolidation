@@ -16,6 +16,8 @@ class Consolidation:
 		self.base_path = path
 		try:
 			self.date_start = db.get_date_last_record()
+			if self.date_start == 0:
+				self.date_start = None
 			self.db = db	
 		except Exception as e:
 			log.error('Exception: %s ', e)

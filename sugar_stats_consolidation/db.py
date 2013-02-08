@@ -230,20 +230,22 @@ class DB_Stats:
 
 			ts_start = datetime.strptime(start, "%Y-%m-%d")
         		ts_end   = datetime.strptime(end, "%Y-%m-%d")
-
+			log.debug('Getting activity most used from: %s -> %s', start, end)
 			rows = cursor1.fetchall()
 			for name in rows:
+				log.debug('Activity found: %s', name[0])
 				if (name[0] != 'system') and (name[0] != 'journal') and (name[0] != 'network') and (name[0] != 'shell'):
-					cursor2.execute ("SELECT SUM(data) FROM Usages WHERE (resource_name = %s) AND (start_date > %s) AND (start_date < %s)", 
-							(name[0],ts_start, ts_end))
+					cursor2.execute (
+						"SELECT SUM(data) FROM Usages WHERE (resource_name = %s) AND (start_date > %s) AND (start_date < %s)", 
+						(name[0],ts_start, ts_end))
 					uptime = cursor2.fetchone()
 					if uptime[0] > uptime_last:
 						uptime_last= uptime[0]
 						activity_name = name[0]
                 except mysql.connector.Error as err:
 			log.error('MySQL on most_activity_used', err)
-		except:
-                        log.error('most_activity_used Fail')
+		except Exception as e:
+                        log.error('most_activity_used Fail: %s', e)
 
                 cursor1.close()
                 cursor2.close()

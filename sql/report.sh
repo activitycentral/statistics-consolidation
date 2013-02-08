@@ -1,7 +1,7 @@
 #!/bin/bash
 QUERY=activity_most_used
-START_DATE=2013-02-00
-END_DATE=2013-02-30
+START_DATE=2013-02-01
+END_DATE=2013-02-28
 DB_NAME=statistics
 DB_USER=root
 DB_PASS=gustavo
