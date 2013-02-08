@@ -14,10 +14,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import print_function
 
 import argparse
-from stats_consolidation.db import *
+from sugar_stats_consolidation.db import *
 import sys
 parser = argparse.ArgumentParser()
 parser.add_argument('--query',required=True)
@@ -29,27 +28,40 @@ parser.add_argument('--db_pass',required=True)
 
 args = parser.parse_args()
 
+_LOG_FORMAT='[%(asctime)s]-%(levelname)s-\'%(name)s\': %(message)s'
 
-"""try:"""
-re = DB_Stats (args.db_name, args.db_user, args.db_pass)
-re.connect()
-if args.query == 'activity_most_used':
-	activity = re.most_activity_used(args.start_date, args.end_date);
-	print ("**************************************************************************************************************")
-	print ("From: {} -> {}:".format(args.start_date, args.end_date))
-	print ("THE MOST USED ACTIVITY: {}, TIME: {} hrs / {} mins / {} secs".format(activity[0], (activity[1]/60/60),(activity[1]/60),activity[1]))
-	print ("***************************************************************************************************************")
 
-if args.query == 'frequency_usage':
-        ts_end   = long (datetime.strptime(args.end_date, "%Y-%m-%d").strftime("%s"))
-	ts_start = long (datetime.strptime(args.start_date, "%Y-%m-%d").strftime("%s"))
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setFormatter(logging.Formatter(_LOG_FORMAT))
+log.addHandler(ch)
 
-	fres = re.frequency_usage(args.start_date, args.end_date);
-	f_x_day = (fres / ((ts_end - ts_start)/(60*60*24)))/60
-	print ("**************************************************************************************************************")
-	print ("From: {} -> {}:".format(args.start_date, args.end_date))
-	print("Frequency usage: %.2f min / day" % (f_x_day))
-	print ("**************************************************************************************************************")
-"""
-print ("Error: {}".format(sys.exc_info()[0]))
-"""
+
+def main():
+	"""try:"""
+	re = DB_Stats (args.db_name, args.db_user, args.db_pass)
+	re.connect()
+	if args.query == 'activity_most_used':
+		activity = re.most_activity_used(args.start_date, args.end_date);
+		log.debug("**************************************************************************************************************")
+		log.debug('From: %s-> %s:', args.start_date, args.end_date)
+		log.debug('THE MOST USED ACTIVITY: %s, TIME: %s hrs / %s mins / %s secs', activity[0], (activity[1]/60/60),(activity[1]/60),activity[1])
+		print ("***************************************************************************************************************")
+
+	if args.query == 'frequency_usage':
+		ts_end   = long (datetime.strptime(args.end_date, "%Y-%m-%d").strftime("%s"))
+		ts_start = long (datetime.strptime(args.start_date, "%Y-%m-%d").strftime("%s"))
+
+		fres = re.frequency_usage(args.start_date, args.end_date);
+		f_x_day = (fres / ((ts_end - ts_start)/(60*60*24)))/60
+		print ("**************************************************************************************************************")
+		print ("From: {0} -> {1}:".format(args.start_date, args.end_date))
+		print("Frequency usage: %.2f min / day" % (f_x_day))
+		print ("**************************************************************************************************************")
+	"""
+	print ("Error: {}".format(sys.exc_info()[0]))
+	"""
+
+if __name__ == '__main__':
+    main()
