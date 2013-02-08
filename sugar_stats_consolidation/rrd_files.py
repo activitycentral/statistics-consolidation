@@ -14,10 +14,10 @@ class RRD:
 
 		self.rrd_name = name
 
-		if date_start == None:
+		if date_start == None or (date_start > rrdtool.last(str(os.path.join(path, name)))):
 			self.date_start = str(rrdtool.first(str(os.path.join (path,name))))
 		else:
-			self.date_start = str(date_start)
+			self.date_start = date_start
 
 		if date_end == None:
 			self.date_end = str(rrdtool.last(str(os.path.join(path, name))))
