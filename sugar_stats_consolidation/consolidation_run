@@ -17,30 +17,48 @@
 from __future__ import print_function
 
 import argparse
+import logging
+
 from sugar_stats_consolidation.db import *
 from sugar_stats_consolidation.rrd_files import *
 from sugar_stats_consolidation.consolidation import *
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--db_user',required=True)
-parser.add_argument('--db_pass',required=True)
-parser.add_argument('--db_name',required=True)
-parser.add_argument('--rrd_path',required=True)
-parser.add_argument('--log_path',required=True)
 
-args = parser.parse_args()
+_LOG_FORMAT='[%(asctime)s]-%(levelname)s-\'%(name)s\': %(message)s'
 
-try:
-	db = DB_Stats (args.db_name, args.db_user, args.db_pass)
-	db.create()
-except Exception as e:
-	print ("Creating DB: {0}".format (str(e)))
+logging.basicConfig(filename='sugar-stats-consolidation.log', format=_LOG_FORMAT, level=logging.DEBUG)
+log = logging.getLogger(__name__)
+
+def main():
+
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--db_user',required=True)
+	parser.add_argument('--db_pass',required=True)
+	parser.add_argument('--db_name',required=True)
+	parser.add_argument('--rrd_path',required=True)
+	parser.add_argument('--log_path',required=True)
+
+	args = parser.parse_args()
+	
+	log.info('**************************************')
+	log.info('       Starting consolidation         ')
+	log.info('**************************************')
+	
+	
+	try:
+		db = DB_Stats (args.db_name, args.db_user, args.db_pass)
+		db.create()
+	except Exception as e:
+		log.warning('Creating DB: %s', str(e))
 
 
-try:
-	con = Consolidation(args.rrd_path, db)
-	con.process_rrds()
-except Exception as e:
-	print ("Processing rrd file: {0}".format(str(e)))
+	try:
+		con = Consolidation(args.rrd_path, db)
+		con.process_rrds()
+	except Exception as e:
+		log.warning('Processing rrd file: %s', str(e))
 
 
+
+if __name__ == '__main__':
+    main()

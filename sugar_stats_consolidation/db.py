@@ -1,11 +1,14 @@
-from __future__ import print_function
 import mysql.connector
 from mysql.connector import errorcode
 from datetime import datetime
+import logging
+
 
 import sugar_stats_consolidation.rrd_files
 
 from rrd_files import *
+
+log = logging.getLogger(__name__)
 
 class DB_Stats:
 	TABLES={}
@@ -45,12 +48,11 @@ class DB_Stats:
 		")")
 
 
-
 	def __init__(self,  db_name, user, password):
 		self.db_name  = db_name
 		self.user = user
 		self.password = password
-		
+				
 
 	def create_database(self, cursor):
 		try:
@@ -62,15 +64,15 @@ class DB_Stats:
 	def create_tables(self, cursor):
 		for name, ddl in self.TABLES.iteritems():
 			try:
-				print("Creating table {0}: ".format(name), end='')
+				log.info('Creating table %s:', name)
 				cursor.execute(ddl)
 		    	except mysql.connector.Error as err:
 				if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
-			    		print("already exists.")
+			    		log.warning('Table %s already exists.', name)
 				else:
 			    		raise Exception ("Error: {0}".format(err))
 		    	else:
-				print("OK")
+				log.info('Table %s crated', name)
 
 	def create (self):
 		self.cnx = mysql.connector.connect(user=self.user, password=self.password)
@@ -78,7 +80,7 @@ class DB_Stats:
 		"""Try connect to db """
 		try:
 		    	self.cnx.database = self.db_name
-			print("DB ["+self.db_name+"] created already, will try create tables:" )
+			log.info('Data Base %s already created, will create tables',  self.db_name)
 			self.create_tables(cursor)
 		except mysql.connector.Error as err:
 			"""If db not exist, then create"""
@@ -120,7 +122,7 @@ class DB_Stats:
 					self.cnx.commit()
 
 			except mysql.connector.Error as err:
-                        	print("Fail {0}: {1}".format(cursor.statement, err))
+                        	log.error('MySQL on store_activiy_uptime: %s %s', cursor.statement, err)
 		cursor.close()
 	
 
@@ -132,14 +134,14 @@ class DB_Stats:
 			cursor.execute(op, params)
 			result = cursor.fetchone()
 			if result != None:
-				print("Resource {0} already in db".format(resource_name))
+				log.info('Resource %s already present in DB', resource_name)
 			else:
 				insert = ("INSERT INTO Resources (name) VALUES (%s)")
 				info = (resource_name, )
 				cursor.execute(insert, info)
 				self.cnx.commit()
 		except mysql.connector.Error as err:
-                        print("Fail {0}: {1}".format(cursor.statement, err))
+                        log.info('MySQL on store_resource:  %s %s', cursor.statement, err)
 
 		cursor.close()
 
@@ -151,7 +153,7 @@ class DB_Stats:
                         cursor.execute(op, params)
                         result = cursor.fetchone()
                         if result != None:
-                                print("User {0} already in db".format(rrd.user_hash))
+                                log.info('User %s already in DB', rrd.user_hash)
                         else:
 				"""FIXME change hardcoded values """
                                 insert = ("INSERT INTO Users (hash, uuid, machine_sn, age, school, sw_version) VALUES (%s, %s, %s, %s, %s, %s)")
@@ -159,7 +161,7 @@ class DB_Stats:
                                 cursor.execute(insert, params)
                                 self.cnx.commit()
                 except mysql.connector.Error as err:
-                        print("Fail {0}: {1}".format(cursor.statement, err))
+                        log.error('MySQL on store_user %s %s', cursor.statement, err)
 
                 cursor.close()
 
@@ -184,7 +186,7 @@ class DB_Stats:
 				self.cnx.commit()
 
                 except mysql.connector.Error as err:
-                        print("Fail {0}: {1}".format(cursor.statement, err))
+                        log.error('MySQL on update_last_record: %s %s', cursor.statement, err)
 			res = -1
 
                 cursor.close()
@@ -196,14 +198,16 @@ class DB_Stats:
                 try:
                         cursor.execute(op)
 			result = cursor.fetchone()
-			if result != None:
-				print ("last record: {0}".format(str(datetime.fromtimestamp (result[0]))))
-                                return result[0]
+			if result != None and result[0] != None:
+				log.info('Last record: %s', str(datetime.fromtimestamp (float (result[0]))))
+				return result[0]
                         else:
-                                print ("Last date record is None")
+                                log.info('Last date record is None')
 				return 0
                 except mysql.connector.Error as err:
-                        print("Fail {0}: {1}".format(cursor.statement, err))
+                        log.error('MySQL on get_date_last_record: %s %s',cursor.statement, err)
+		except Exception as e:
+			raise Exception ("get_date_last_record: {0}".format(e))
                 cursor.close()
 
 
@@ -214,7 +218,7 @@ class DB_Stats:
 		    	self.cnx.database = self.db_name
 			cursor.close()
 		except mysql.connector.Error as err:
-			print("CONNECT FAIL {0}".format (err))
+			log.error('MySQL Connect fail', err)
 	
 	def most_activity_used (self, start, end):
 		uptime_last=0
@@ -237,9 +241,9 @@ class DB_Stats:
 						uptime_last= uptime[0]
 						activity_name = name[0]
                 except mysql.connector.Error as err:
-			print("Fail {0}:".format(err))
+			log.error('MySQL on most_activity_used', err)
 		except:
-                        print("most_activity_used Fail ")
+                        log.error('most_activity_used Fail')
 
                 cursor1.close()
                 cursor2.close()
@@ -255,7 +259,7 @@ class DB_Stats:
 			res = cursor.fetchone()
 			return res[0]
 		except mysql.connector.Error as err:
-                        print("Fail {0}: {1}".format(cursor.statement, err))
+                        log.error("MySQL on fequency_usage %s: %s", cursor.statement, err)
 		cursor.close()	
 
 	

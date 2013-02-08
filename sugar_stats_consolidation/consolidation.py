@@ -1,18 +1,25 @@
-from __future__ import print_function
 import os
 import argparse
+import logging
 
 import rrd_files
 import db
 from rrd_files import *
 from db import *
 
+
+log = logging.getLogger(__name__)
+
 class Consolidation:
 	
 	def __init__(self, path, db):
 		self.base_path = path
-		self.date_start = db.get_date_last_record()
-		self.db = db	
+		try:
+			self.date_start = db.get_date_last_record()
+			self.db = db	
+		except Exception as e:
+			log.error('Exception: %s ', e)
+	
 	def process_rrds (self):
 		id_hash_list = os.listdir(unicode(self.base_path))
 		try:
@@ -29,13 +36,13 @@ class Consolidation:
 										rrd_obj = RRD (path=rrd_path, name=rrd, date_start=self.date_start, date_end=None)
 										self.db.store_activity_uptime(rrd_obj)
 									except Exception as e:
-										print ("warning, coninute ..")
+										log.warning('Exception on RRD object instance: \'%s\'', e)
 							else:
-								print ("RRD file not found: {0}".format(os.path.join(self.base_path, id_hash, user_hash)))
+								log.warning('RRD file not found: %s', os.path.join(self.base_path, id_hash, user_hash))
 					else:
-						print ("None hash user found on: {0}".format(os.path.join(self.base_path, id_hash)))	
+						log.warning('Hash user direcotory not found: %s', os.path.join(self.base_path, id_hash))	
 			else:
-				print ("None hash ids  found on: {0}" + format(self.base_path))
+				log.error('Hash ids  not found on: %s', self.base_path)
 		except Exception as e:
-			print ("Error processing rrds: {0}".format(str(e)))
+			log.error('Excpetion processing rrds: \'%s\'', e)
 						
