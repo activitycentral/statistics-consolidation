@@ -155,9 +155,8 @@ class DB_Stats:
                         if result != None:
                                 log.info('User %s already in DB', rrd.user_hash)
                         else:
-				"""FIXME change hardcoded values """
                                 insert = ("INSERT INTO Users (hash, uuid, machine_sn, age, school, sw_version) VALUES (%s, %s, %s, %s, %s, %s)")
-                		params = (rrd.get_user_hash(), rrd.get_uuid(), "unk_machine_sn", 0, "unk_escuela", "1.0.0")
+                		params = (rrd.get_user_hash(), rrd.get_uuid(), rrd.get_sn(), rrd.get_age(), rrd.get_school(), "1.0.0")
                                 cursor.execute(insert, params)
                                 self.cnx.commit()
                 except mysql.connector.Error as err:

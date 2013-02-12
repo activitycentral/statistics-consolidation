@@ -47,30 +47,29 @@ logging.getLogger('sugar_stats_consolidation.db').addHandler(ch)
 
 
 def main():
-	"""try:"""
 	re = DB_Stats (args.db_name, args.db_user, args.db_pass)
 	re.connect()
 	if args.query == 'activity_most_used':
 		activity = re.most_activity_used(args.start_date, args.end_date);
 		log.debug("**************************************************************************************************************")
-		log.debug('From: %s-> %s:', args.start_date, args.end_date)
-		log.debug('THE MOST USED ACTIVITY: %s', activity[0])
-		log.debug('TIME:                   %s hrs / %s mins / %s secs', (activity[1]/60/60), (activity[1]/60), activity[1])
+		log.debug("                                     Most Activity used                                                       ")
+		log.debug('NAME:   %s', activity[0])
+		log.debug('PERIOD: %s-> %s', args.start_date, args.end_date)
+		log.debug('TIME:   %.2f hrs / %.2f mins / %.2f secs', (activity[1]/60/60), (activity[1]/60), activity[1])
 		log.debug("***************************************************************************************************************")
-
 	if args.query == 'frequency_usage':
 		ts_end   = long (datetime.strptime(args.end_date, "%Y-%m-%d").strftime("%s"))
 		ts_start = long (datetime.strptime(args.start_date, "%Y-%m-%d").strftime("%s"))
 
 		fres = re.frequency_usage(args.start_date, args.end_date);
 		f_x_day = (fres / ((ts_end - ts_start)/(60*60*24)))/60
-		print ("**************************************************************************************************************")
-		print ("From: {0} -> {1}:".format(args.start_date, args.end_date))
-		print("Frequency usage: %.2f min / day" % (f_x_day))
-		print ("**************************************************************************************************************")
-	"""
-	print ("Error: {}".format(sys.exc_info()[0]))
-	"""
+		f_total = (fres / 60)
+		log.debug("**************************************************************************************************************")
+		log.debug("                                     Fequency Usage                                                           ")
+		log.debug('PERIOD:         %s-> %s', args.start_date, args.end_date)
+		log.debug('USAGE PER DAY:  %.2f min / day', (f_x_day))
+		log.debug('USAGE TOTAL:    %.2f min', (f_total))
+		log.debug("**************************************************************************************************************")
 
 if __name__ == '__main__':
     main()
