@@ -54,6 +54,11 @@ def main():
 	try:
 		con = Consolidation(args.rrd_path, db)
 		con.process_rrds()
+		db.close()
+	
+		log.info('**************************************')
+		log.info('       Finish consolidation           ')
+		log.info('**************************************')
 	except Exception as e:
 		log.warning('Processing rrd file: %s', str(e))
 

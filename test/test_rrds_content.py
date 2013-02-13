@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
-from rrd_files import *
+from sugar_stats_consolidation.rrd_files import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--rrd_path',required=False)
@@ -12,7 +12,7 @@ args = parser.parse_args()
 print "==============================       TEST RRD analyze content  ========================================"
 
 if args.rrd_path == None:
-	def_path = "/home/olpc/.sugar/default/stats"
+	def_path = "/var/lib/sugar-stats/rrd/ed/ed4f8bd4c24d4f10b7bd6c59add7032b0fbf5dbd"
 else: 
 	def_path = args.rrd_path
 

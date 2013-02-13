@@ -1,6 +1,7 @@
 #!/bin/bash
 #QUERY=activity_most_used
-QUERY=frequency_usage
+#QUERY=frequency_usage
+QUERY=all
 START_DATE=2013-02-10
 END_DATE=2013-02-14
 DB_NAME=statistics

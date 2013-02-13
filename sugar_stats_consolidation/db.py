@@ -106,6 +106,16 @@ class DB_Stats:
 		self.store_user(rrd)
 		
 		cursor = self.cnx.cursor()
+		select = ("SELECT * FROM Usages WHERE "
+				"user_hash = %s AND "
+				"resource_name = %s AND "
+				"start_date = %s AND "
+				"data_type = %s")
+		update = ("UPDATE Usages SET data = %s WHERE "
+				"user_hash = %s AND "
+				"resource_name = %s AND "
+				"start_date = %s AND "
+				"data_type = %s")
 		insert = ("INSERT INTO Usages " 
 				"(user_hash, "
 				"resource_name, "
@@ -115,11 +125,22 @@ class DB_Stats:
 				"VALUES (%s, %s, %s, %s ,%s) ")
 
 		for d in rrd.get_uptime_by_interval():
-			info = (rrd.get_user_hash(), rrd.get_name() , datetime.fromtimestamp(float(d[0])), 'uptime', d[1])	
+			info_sel = (rrd.get_user_hash(), rrd.get_name() , datetime.fromtimestamp(float(d[0])), 'uptime')	
 			try:
-				cursor.execute(insert, info)
-				if self.update_last_record(rrd.get_date_last_record()) == 0:	
-					self.cnx.commit()
+				"""Verify if this activity has an entry already at the same start_date"""
+				cursor.execute (select, info_sel)
+				result = cursor.fetchone()
+	
+				if result != None:
+					log.info('Update uptime \'%s\' entry for resource \'%s\' ', d[1], rrd.get_name())
+					info_up = (d[1], rrd.get_user_hash(), rrd.get_name() , datetime.fromtimestamp(float(d[0])), 'uptime')	
+					cursor.execute(update, info_up)
+				else:
+					log.info('New uptime \'%s\' entry for resource \'%s\'', d[1], rrd.get_name())
+					info_ins = (rrd.get_user_hash(), rrd.get_name() , datetime.fromtimestamp(float(d[0])), 'uptime', d[1])	
+					cursor.execute(insert, info_ins)
+
+				self.cnx.commit()
 
 			except mysql.connector.Error as err:
                         	log.error('MySQL on store_activiy_uptime: %s %s', cursor.statement, err)
@@ -134,7 +155,7 @@ class DB_Stats:
 			cursor.execute(op, params)
 			result = cursor.fetchone()
 			if result != None:
-				log.info('Resource %s already present in DB', resource_name)
+				log.debug('Resource %s already present in DB', resource_name)
 			else:
 				insert = ("INSERT INTO Resources (name) VALUES (%s)")
 				info = (resource_name, )
@@ -153,7 +174,7 @@ class DB_Stats:
                         cursor.execute(op, params)
                         result = cursor.fetchone()
                         if result != None:
-                                log.info('User %s already in DB', rrd.user_hash)
+                                log.debug('User %s already in DB', rrd.user_hash)
                         else:
                                 insert = ("INSERT INTO Users (hash, uuid, machine_sn, age, school, sw_version) VALUES (%s, %s, %s, %s, %s, %s)")
                 		params = (rrd.get_user_hash(), rrd.get_uuid(), rrd.get_sn(), rrd.get_age(), rrd.get_school(), "1.0.0")
@@ -166,24 +187,23 @@ class DB_Stats:
 
 
 
-	def update_last_record (self, ts):
+	def update_last_record (self):
 		cursor = self.cnx.cursor()
 		res = 0
                 op = ("SELECT * FROM Runs")
-                params = (datetime.fromtimestamp(float(ts)),)
                 try:
 			cursor.execute(op)
 			result = cursor.fetchone()
 
 			if result != None:
-				op = ("UPDATE Runs SET last_ts = %s")
-                		cursor.execute(op, params)
+				op = ("UPDATE Runs SET last_ts = CURRENT_TIMESTAMP")
+                		cursor.execute(op)
 				self.cnx.commit()
 			else:
-				op = ("INSERT INTO Runs VALUES(%s)")
-				cursor.execute(op, params)
+				op = ("INSERT INTO Runs VALUES(CURRENT_TIMESTAMP)")
+				cursor.execute(op)
 				self.cnx.commit()
-
+			log.info("Save last record");
                 except mysql.connector.Error as err:
                         log.error('MySQL on update_last_record: %s %s', cursor.statement, err)
 			res = -1

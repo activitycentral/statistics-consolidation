@@ -42,7 +42,9 @@ class Consolidation:
 							else:
 								log.warning('RRD file not found: %s', os.path.join(self.base_path, id_hash, user_hash))
 					else:
-						log.warning('Hash user direcotory not found: %s', os.path.join(self.base_path, id_hash))	
+						log.warning('Hash user direcotory not found: %s', os.path.join(self.base_path, id_hash))
+				self.db.update_last_record();
+				log.info("End RRDs processing")	
 			else:
 				log.error('Hash ids  not found on: %s', self.base_path)
 		except Exception as e:
