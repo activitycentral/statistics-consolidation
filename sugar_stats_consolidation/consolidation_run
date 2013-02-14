@@ -21,23 +21,24 @@ import logging
 from sugar_stats_consolidation.db import *
 from sugar_stats_consolidation.rrd_files import *
 from sugar_stats_consolidation.consolidation import *
+	
+parser = argparse.ArgumentParser()	
+parser.add_argument('--db_user',required=True)
+parser.add_argument('--db_pass',required=True)
+parser.add_argument('--db_name',required=True)
+parser.add_argument('--rrd_path',required=True)
+parser.add_argument('--log_path',required=True)
+
+args = parser.parse_args()
 
 
 _LOG_FORMAT='[%(asctime)s]-%(levelname)s-\'%(name)s\': %(message)s'
 
-logging.basicConfig(filename='sugar-stats-consolidation.log', format=_LOG_FORMAT, level=logging.DEBUG)
+logging.basicConfig(filename=os.path.join(args.log_path,'sugar-stats-consolidation.log'), format=_LOG_FORMAT, level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
 def main():
 
-	parser = argparse.ArgumentParser()
-	parser.add_argument('--db_user',required=True)
-	parser.add_argument('--db_pass',required=True)
-	parser.add_argument('--db_name',required=True)
-	parser.add_argument('--rrd_path',required=True)
-	parser.add_argument('--log_path',required=True)
-
-	args = parser.parse_args()
 	
 	log.info('**************************************')
 	log.info('       Starting consolidation         ')
