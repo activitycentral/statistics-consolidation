@@ -37,6 +37,7 @@ class Consolidation:
 									try:
 										rrd_obj = RRD (path=rrd_path, name=rrd, date_start=self.date_start, date_end=None)
 										self.db.store_activity_uptime(rrd_obj)
+										self.db.store_activity_focus_time(rrd_obj)
 									except Exception as e:
 										log.warning('Exception on RRD object instance: \'%s\'', e)
 							else:

@@ -99,8 +99,15 @@ class DB_Stats:
 		self.cnx.close()
 
 
+	def store_activity_uptime (self, rrd):
+		self.store_activity_time (rrd, 'uptime')
 
-	def store_activity_uptime(self, rrd):
+	def store_activity_focus_time (self, rrd):
+		self.store_activity_time(rrd, 'active')
+
+	
+
+	def store_activity_time(self, rrd, data_type):
 		
 		self.store_resource(rrd.get_name())
 		self.store_user(rrd)
@@ -124,26 +131,26 @@ class DB_Stats:
 				"data) "
 				"VALUES (%s, %s, %s, %s ,%s) ")
 
-		for d in rrd.get_uptime_by_interval():
-			info_sel = (rrd.get_user_hash(), rrd.get_name() , datetime.fromtimestamp(float(d[0])), 'uptime')	
+		for d in rrd.get_last_value_by_interval(data_type):
+			info_sel = (rrd.get_user_hash(), rrd.get_name() , datetime.fromtimestamp(float(d[0])), data_type)	
 			try:
 				"""Verify if this activity has an entry already at the same start_date"""
 				cursor.execute (select, info_sel)
 				result = cursor.fetchone()
 	
 				if result != None:
-					log.info('Update uptime \'%s\' entry for resource \'%s\' ', d[1], rrd.get_name())
-					info_up = (d[1], rrd.get_user_hash(), rrd.get_name() , datetime.fromtimestamp(float(d[0])), 'uptime')	
+					log.info('Update %s \'%s\' entry for resource \'%s\' ', data_type, d[1], rrd.get_name())
+					info_up = (d[1], rrd.get_user_hash(), rrd.get_name() , datetime.fromtimestamp(float(d[0])), data_type)	
 					cursor.execute(update, info_up)
 				else:
-					log.info('New uptime \'%s\' entry for resource \'%s\'', d[1], rrd.get_name())
-					info_ins = (rrd.get_user_hash(), rrd.get_name() , datetime.fromtimestamp(float(d[0])), 'uptime', d[1])	
+					log.info('New %s \'%s\' entry for resource \'%s\'', data_type, d[1], rrd.get_name())
+					info_ins = (rrd.get_user_hash(), rrd.get_name() , datetime.fromtimestamp(float(d[0])), data_type, d[1])	
 					cursor.execute(insert, info_ins)
 
 				self.cnx.commit()
 
 			except mysql.connector.Error as err:
-                        	log.error('MySQL on store_activiy_uptime: %s %s', cursor.statement, err)
+                        	log.error('MySQL on store_activiy_time()%s: %s %s', data_type, cursor.statement, err)
 		cursor.close()
 	
 
@@ -239,7 +246,31 @@ class DB_Stats:
 		except mysql.connector.Error as err:
 			log.error('MySQL Connect fail', err)
 	
-	def most_activity_used (self, start, end):
+	def rep_activity_time (self, start, end, activity):
+		uptime_last=0
+		activity_name=''
+                try:
+			ts_start = datetime.strptime(start, "%Y-%m-%d")
+        		ts_end   = datetime.strptime(end, "%Y-%m-%d")
+			
+			cursor = self.cnx.cursor()
+                       	cursor.execute("SELECT SUM(data) FROM Usages WHERE resource_name = %s AND data_type = %s", (activity,'uptime'))
+			log.debug('Getting uptime of (%s) from: %s -> %s', activity, start, end)
+			uptime = cursor.fetchone()
+                
+		       	cursor.execute("SELECT SUM(data) FROM Usages WHERE resource_name = %s AND data_type = %s", (activity,'active'))
+			log.debug('Getting active of (%s) from: %s -> %s', activity, start, end)
+			active = cursor.fetchone()
+                
+                	cursor.close()
+			return (uptime[0], active[0])
+		except mysql.connector.Error as err:
+			log.error('MySQL on rep_activity_time %s', err)
+		except Exception as e:
+                        log.error('MySQL on rep_activity_time : %s', e)
+		return (None, None)	
+	
+	def rep_most_activity_used (self, start, end):
 		uptime_last=0
 		activity_name=''
                 try:
@@ -255,14 +286,15 @@ class DB_Stats:
 				log.debug('Activity found: %s', name[0])
 				if (name[0] != 'system') and (name[0] != 'journal') and (name[0] != 'network') and (name[0] != 'shell'):
 					cursor2.execute (
-						"SELECT SUM(data) FROM Usages WHERE (resource_name = %s) AND (start_date > %s) AND (start_date < %s)", 
-						(name[0],ts_start, ts_end))
+						"SELECT SUM(data) FROM Usages WHERE (resource_name = %s) AND "
+						"(start_date > %s) AND (start_date < %s) "
+						"AND (data_type = 'active')", (name[0],ts_start, ts_end))
 					uptime = cursor2.fetchone()
 					if uptime[0] > uptime_last:
 						uptime_last= uptime[0]
 						activity_name = name[0]
                 except mysql.connector.Error as err:
-			log.error('MySQL on most_activity_used', err)
+			log.error('MySQL on most_activity_used %s', err)
 		except Exception as e:
                         log.error('most_activity_used Fail: %s', e)
 
@@ -270,7 +302,7 @@ class DB_Stats:
                 cursor2.close()
 		return (activity_name, uptime_last)
 
-	def frequency_usage(self, start, end):
+	def rep_frequency_usage(self, start, end):
 		cursor = self.cnx.cursor()
                 try:
 			ts_start = datetime.strptime(start, "%Y-%m-%d")
