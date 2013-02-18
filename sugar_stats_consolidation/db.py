@@ -268,8 +268,61 @@ class DB_Stats:
 			log.error('MySQL on rep_activity_time %s', err)
 		except Exception as e:
                         log.error('MySQL on rep_activity_time : %s', e)
-		return (None, None)	
+		return (None, None)
+
 	
+	def is_an_activity(self, name):
+		if (name != 'system') and (name != 'journal') and (name != 'network') and (name != 'shell'):
+			return True
+		else:	
+			return False
+
+	def rep_get_most_activity_used_by_school (self, school, start, end):
+		activity_name=''
+		focus_last = 0
+		try:
+			log.debug('Most activiy used by school: %s', school)
+			cursor1 = self.cnx.cursor()
+			cursor2 = self.cnx.cursor()
+			cursor3 = self.cnx.cursor()
+			""" Get user hash from a School"""
+			cursor1.execute ("SELECT hash FROM Users WHERE school = %s", (school,))
+			user_hashes = cursor1.fetchall()
+			
+			""" Get valid activities """
+			cursor2.execute("SELECT name FROM Resources")
+			resources = cursor2.fetchall()
+			
+			""" Cursor for select resources from Uages table"""
+			select_usage = "SELECT SUM(data) FROM Usages WHERE (resource_name = %s) AND (start_date > %s) AND (start_date < %s) AND (data_type = 'active') AND (user_hash = %s)"
+
+			ts_start = datetime.strptime(start, "%Y-%m-%d")
+			ts_end   = datetime.strptime(end, "%Y-%m-%d")
+
+
+			for resource in resources:
+				log.debug('Resource: %s', resource[0])
+				if self.is_an_activity (resource[0]):
+					for user_hash in user_hashes:
+						log.debug('user Hash: %s', user_hash[0])
+						cursor3.execute(select_usage, (resource[0], ts_start, ts_end, user_hash[0]))
+						focus = cursor3.fetchone()
+						log.debug('Focus time: %s', )
+						if focus[0] > focus_last:
+							focus_last = focus[0]
+							activity_name = resource[0]
+		except  mysql.connector.Error as err:
+                        log.error('MySQL on most_activity_used_by_school %s', err)
+                except Exception as e:
+                        log.error('most_activity_used_by_school Fail: %s', e)
+                cursor1.close()
+                cursor2.close()
+                cursor3.close()
+		return (activity_name, focus_last)
+
+					
+		
+
 	def rep_most_activity_used (self, start, end):
 		uptime_last=0
 		activity_name=''
@@ -301,6 +354,9 @@ class DB_Stats:
                 cursor1.close()
                 cursor2.close()
 		return (activity_name, uptime_last)
+
+
+
 
 	def rep_frequency_usage(self, start, end):
 		cursor = self.cnx.cursor()

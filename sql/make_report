@@ -29,6 +29,8 @@ parser.add_argument('--db_name',required=True)
 parser.add_argument('--db_user',required=True)
 parser.add_argument('--db_pass',required=True)
 parser.add_argument('--activity',required=False)
+parser.add_argument('--school',required=False)
+parser.add_argument('--log_level',required=False)
 
 args = parser.parse_args()
 
@@ -37,23 +39,35 @@ _LOG_FORMAT='[%(asctime)s]-%(levelname)s-\'%(name)s\': %(message)s'
 """
 _LOG_FORMAT='%(message)s'
 
+if args.log_level == 'debug':
+	log_level = logging.DEBUG
+else:
+	log_level = logging.INFO
+
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
+log.setLevel(log_level)
 ch = logging.StreamHandler()
 ch.setFormatter(logging.Formatter(_LOG_FORMAT))
 log.addHandler(ch)
 
 logging.getLogger('sugar_stats_consolidation.db').addHandler(ch)
+logging.getLogger('sugar_stats_consolidation.db').setLevel(log_level)
+logging.getLogger('sugar_stats_consolidation.rrd_files').addHandler(ch)
+logging.getLogger('sugar_stats_consolidation.rrd_files').setLevel(log_level)
 
-def activity_most_used(re, start, end):
-	activity = re.rep_most_activity_used(start, end);
-	log.debug("**************************************************************************************************************")
-	log.debug("                                     Most Activity used                                                       ")
-	log.debug('NAME:     %s', activity[0])
-	log.debug('INTERVAL: %s-> %s', start, end)
-	log.debug('TIME:     %.2f hrs / %.2f mins / %.2f secs', (activity[1]/60/60), (activity[1]/60), activity[1])
-	log.debug("***************************************************************************************************************")
+def activity_most_used(re, start, end, school=None):
+	if school==None:
+		activity = re.rep_most_activity_used(start, end);
+	else:
+		activity = re.rep_get_most_activity_used_by_school(school, start,end)
+	log.info("**************************************************************************************************************")
+	log.info("                                     Most Activity used                                                       ")
+	log.info('NAME:     %s', activity[0])
+	log.info('SCHOOL:   %s', school)
+	log.info('INTERVAL: %s-> %s', start, end)
+	log.info('TIME:     %.2f hrs / %.2f mins / %.2f secs', (activity[1]/60/60), (activity[1]/60), activity[1])
+	log.info("***************************************************************************************************************")
 
 def frequency_usage(re, start, end):
 	ts_end   = long (datetime.strptime(end, "%Y-%m-%d").strftime("%s"))
@@ -62,25 +76,25 @@ def frequency_usage(re, start, end):
 	fres = re.rep_frequency_usage(start, end);
 	f_x_day = (fres / ((ts_end - ts_start)/(60*60*24)))/60
 	f_total = (fres / 60)
-	log.debug("**************************************************************************************************************")
-	log.debug("                                     Fequency Usage                                                           ")
-	log.debug('INTERVAL: %s-> %s', start, end)
-	log.debug('PER DAY:  %.2f min / day', (f_x_day))
-	log.debug('TOTAL:    %.2f min', (f_total))
-	log.debug("**************************************************************************************************************")
+	log.info("**************************************************************************************************************")
+	log.info("                                     Fequency Usage                                                           ")
+	log.info('INTERVAL: %s-> %s', start, end)
+	log.info('PER DAY:  %.2f min / day', (f_x_day))
+	log.info('TOTAL:    %.2f min', (f_total))
+	log.info("**************************************************************************************************************")
 
 def activity_time (re, start, end, activity):
 	ts_end   = long (datetime.strptime(end, "%Y-%m-%d").strftime("%s"))
 	ts_start = long (datetime.strptime(start, "%Y-%m-%d").strftime("%s"))
 
 	time = re.rep_activity_time (start, end, activity);
-	log.debug("**************************************************************************************************************")
-	log.debug("                                     Activity Time                                                            ")  
-	log.debug('NAME:     %s', activity)
-	log.debug('INTERVAL: %s-> %s', start, end)
-	log.debug('UPTIME:   %s secs', time[0])
-	log.debug('FOCUS     %s secs', time[1])
-	log.debug("**************************************************************************************************************")
+	log.info("**************************************************************************************************************")
+	log.info("                                     Activity Time                                                            ")  
+	log.info('NAME:     %s', activity)
+	log.info('INTERVAL: %s-> %s', start, end)
+	log.info('UPTIME:   %s secs', time[0])
+	log.info('FOCUS     %s secs', time[1])
+	log.info("**************************************************************************************************************")
 
 
 
@@ -91,7 +105,7 @@ def main():
 	if args.query == 'activity_time':
 		activity_time(re, args.start_date, args.end_date, args.activity)
 	elif args.query == 'activity_most_used':
-		activity_most_used(re, args.start_date, args.end_date);
+		activity_most_used(re, args.start_date, args.end_date, args.school);
 	elif args.query == 'frequency_usage':
 		frequency_usage(re, args.start_date, args.end_date)
 	elif args.query == 'all':
