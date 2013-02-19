@@ -392,10 +392,20 @@ class DB_Stats:
 				
 
 		except mysql.connector.Error as err:
-                        log.error("MySQL on fequency_usage_by_school %s: %s", cursor.statement, err)
+                        log.error("MySQL on %s: %s", cursor.statement, err)
 		cursor1.close()	
 		cursor2.close()	
 
+
+	def rep_update_school(self, machine_sn, school):
+		cursor = self.cnx.cursor()
+		try:
+			log.debug("Set school name: %s to user with machine_sn: %s", school, machine_sn)
+			cursor.execute ("UPDATE Users SET school = %s WHERE machine_sn = %s", (school, machine_sn))
+		except mysql.connector.Error as err:
+			log.error("MySQL on %s: %s", cursor.statement, err)
+		
+		cursor.close()
 
 #=========================================================================================================
 #				     A U X I L I A R   M E T H O D S

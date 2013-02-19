@@ -1,4 +1,5 @@
-DB_USER="root"SS="gustavo"
+DB_USER="root"
+DB_PASS="gustavo"
 DB_NAME="statistics"
 RRD_PATH=/var/lib/sugar-stats/rrd
 APP_PATH=/home/ceibal/ac/statistics-consolidation

@@ -23,14 +23,15 @@ import logging
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--query',required=True)
-parser.add_argument('--start_date',required=True)
-parser.add_argument('--end_date',required=True)
+parser.add_argument('--start_date',required=False)
+parser.add_argument('--end_date',required=False)
 parser.add_argument('--db_name',required=True)
 parser.add_argument('--db_user',required=True)
 parser.add_argument('--db_pass',required=True)
 parser.add_argument('--activity',required=False)
 parser.add_argument('--school',required=False)
 parser.add_argument('--log_level',required=False)
+parser.add_argument('--machine_sn',required=False)
 
 args = parser.parse_args()
 
@@ -100,6 +101,14 @@ def activity_time (re, start, end, activity, school=None):
 	log.info('FOCUS     %s secs', time[1])
 	log.info("**************************************************************************************************************")
 
+def update_school  (re, machine_sn, school):
+	re.rep_update_school(machine_sn, school);
+	
+	log.info("**************************************************************************************************************")
+	log.info("                                     Set School name to User                                                  ")  
+	log.info('SCHOOL:     %s', school)
+	log.info('MACHINE_SN: %s', machine_sn)
+	log.info("**************************************************************************************************************")
 
 
 def main():
@@ -112,6 +121,8 @@ def main():
 		activity_most_used(re, args.start_date, args.end_date, args.school);
 	elif args.query == 'frequency_usage':
 		frequency_usage(re, args.start_date, args.end_date, args.school)
+	elif args.query == 'update_school':
+		update_school(re, args.machine_sn, args.school)
 	elif args.query == 'all':
 		activity_most_used(re, args.start_date, args.end_date,args.school);
 		frequency_usage(re, args.start_date, args.end_date, args.school)

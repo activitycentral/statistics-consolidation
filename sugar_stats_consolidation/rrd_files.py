@@ -146,10 +146,10 @@ class RRD:
                 return l[idx]
 
 	def get_uuid_from_file(self,path):
-		return open (os.path.join(path, "machine_uuid")).next()
+		return open (os.path.join(path, "machine_uuid")).next().strip("\"")
 	
 	def get_machine_sn_from_file(self,path):
-		return open (os.path.join(path, "machine_sn")).next()
+		return open (os.path.join(path, "machine_sn")).next().strip("\"")
 
 		
 	def get_user_hash(self):
