@@ -369,7 +369,7 @@ class DB_Stats:
 	def rep_frequency_usage (self, start, end, school=None):
 		cursor1 = self.cnx.cursor()
 		cursor2 = self.cnx.cursor()
-                res = 0
+                time = 0
 		try:
 			ts_start = self.date_to_ts(start)
         		ts_end   = self.date_to_ts(end)
@@ -382,13 +382,15 @@ class DB_Stats:
 			
 				for user_hash in user_hashes:
 					cursor2.execute("SELECT SUM(data) FROM Usages WHERE (resource_name = 'system') AND (start_date > %s) AND (start_date < %s) AND (data_type = 'uptime') AND (user_hash = %s)", (ts_start, ts_end, user_hash[0]))
-					res = float (cursor2.fetchone()[0]) + res 
-				return res
+					res = cursor2.fetchone()
+					if res != None and res[0] != None:
+						time = float (res[0]) + time 
 			else:
 				log.debug('Frequency usage')
 				cursor2.execute("SELECT SUM(data) FROM Usages WHERE (resource_name = 'system') AND (start_date > %s) AND (start_date < %s) AND (data_type = 'uptime')", (ts_start, ts_end))
-				res = cursor2.fetchone()
-				return res[0]
+				time = cursor2.fetchone()[0]
+		
+			return time
 				
 
 		except mysql.connector.Error as err:

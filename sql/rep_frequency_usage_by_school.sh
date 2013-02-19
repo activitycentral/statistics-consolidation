@@ -4,7 +4,7 @@ DB_USER=root
 DB_PASS=gustavo
 
 QUERY=frequency_usage
-SCHOOL=Ceibal
+SCHOOL=Ceibalito
 
 START_DATE=2013-02-10
 END_DATE=2013-02-14
