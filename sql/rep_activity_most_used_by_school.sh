@@ -4,11 +4,11 @@ DB_USER=root
 DB_PASS=gustavo
 
 QUERY=activity_most_used
-SCHOOL=Ceibal
+SCHOOL=activitycentral
 START_DATE=2013-02-10
 END_DATE=2013-02-14
 
-LOG_LEVEL=debug
+LOG_LEVEL=info
 
 
 

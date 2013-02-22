@@ -305,14 +305,23 @@ class DB_Stats:
                         log.error('MySQL on rep_activity_time : %s', e)
 		return (None, None)
 
-	
 
-	def rep_get_most_activity_used (self, start, end, school=None):
-		activity_name=''
-		focus_last = 0
+
+	def rep_get_activities (self, start, end, school=None, desktop='any'):
+		res_list = list();
 		cursor1 = self.cnx.cursor()
 		cursor2 = self.cnx.cursor()
 		cursor3 = self.cnx.cursor()
+		
+		if desktop == 'gnome':
+			cursor2.execute("SELECT name FROM Resources WHERE name REGEXP 'application'")
+		elif desktop == 'sugar':
+			cursor2.execute("SELECT name FROM Resources WHERE name REGEXP 'activity'")
+		else:	
+			cursor2.execute("SELECT name FROM Resources")
+		
+		resources = cursor2.fetchall()
+			 
 		try:
 			if school != None:
 				log.debug('Most activiy used by school: %s', school)
@@ -324,11 +333,8 @@ class DB_Stats:
 			else:
 				log.debug('Most activiy used')
 				""" Cursor for select resources from Uages table"""
-				select_usage = "SELECT SUM(data) FROM Usages WHERE (resource_name = %s) AND (start_date > %s) AND (start_date < %s) AND (data_type = 'active')"
+				select_usage = "SELECT SUM(data) FROM Usages WHERE (resource_name = %s) AND (start_date > %s) AND (start_date < %s) AND (data_type = 'active')" 
 				
-			""" Get valid activities """
-			cursor2.execute("SELECT name FROM Resources")
-			resources = cursor2.fetchall()
 			
 
 			ts_start = self.date_to_ts(start)
@@ -343,17 +349,16 @@ class DB_Stats:
 							log.debug('user Hash: %s', user_hash[0])
 							cursor3.execute(select_usage, (resource[0], ts_start, ts_end, user_hash[0]))
 							focus = cursor3.fetchone()[0]
+							if focus == None: focus = 0
+
 							log.debug('Focus time: %s', focus)
-							if focus > focus_last:
-								focus_last = focus
-								activity_name = resource[0]
+							res_list.append((resource[0], focus))
 					else:
 						cursor3.execute(select_usage, (resource[0], ts_start, ts_end))
 						focus = cursor3.fetchone()[0]
+						if focus == None: focus = 0
 						log.debug('Focus time: %s', focus )
-						if focus > focus_last:
-							focus_last = focus
-							activity_name = resource[0]
+						res_list.append((resource[0], focus))
 						
 		except  mysql.connector.Error as err:
                         log.error('MySQL on most_activity_used %s', err)
@@ -362,13 +367,15 @@ class DB_Stats:
                 cursor1.close()
                 cursor2.close()
                 cursor3.close()
-		return (activity_name, focus_last)
+		log.debug ('Activities: %s', sorted(res_list, key=lambda x: x[1], reverse=True))
+		return sorted(res_list, key=lambda x: x[1], reverse=True)		
 
 					
 
 	def rep_frequency_usage (self, start, end, school=None):
 		cursor1 = self.cnx.cursor()
 		cursor2 = self.cnx.cursor()
+		user_hashes=()
                 time = 0
 		try:
 			ts_start = self.date_to_ts(start)
@@ -387,10 +394,12 @@ class DB_Stats:
 						time = float (res[0]) + time 
 			else:
 				log.debug('Frequency usage')
+				cursor1.execute ("SELECT hash FROM Users")
+				user_hashes = cursor1.fetchall()
 				cursor2.execute("SELECT SUM(data) FROM Usages WHERE (resource_name = 'system') AND (start_date > %s) AND (start_date < %s) AND (data_type = 'uptime')", (ts_start, ts_end))
 				time = cursor2.fetchone()[0]
 		
-			return time
+			return (time, len(user_hashes))
 				
 
 		except mysql.connector.Error as err:
@@ -420,4 +429,6 @@ class DB_Stats:
 
 	def date_to_ts(self, date):
 		return datetime.strptime(date, "%Y-%m-%d")
-	
+
+
+			
