@@ -120,23 +120,23 @@ def frequency_usage(re, start, end, school=None):
 
 	ts_end   = long (datetime.strptime(end, "%Y-%m-%d").strftime("%s"))
 	ts_start = long (datetime.strptime(start, "%Y-%m-%d").strftime("%s"))
-	
 
-	f_x_day = (fres / ((ts_end - ts_start)/(60*60*24)))/60
 	f_total = (fres / 60)
 	if xos != 0:
 		average = f_total / xos
+		average_x_day = average / ((ts_end - ts_start)/(60*60*24))
 	else:
 		average = 0
+		average_x_day = 0
 	log.info("\n\n")
 	log.info("**************************************************************************************************************")
 	log.info("                                     Fequency Usage                                                           ")
-	log.info('SCHOOL:        %s', school)
-	log.info('INTERVAL:      %s-> %s', start, end)
-	log.info('NUMBER OF XOs: %s', xos)
-	log.info('PER DAY:       %.2f min/day', (f_x_day))
-	log.info('TOTAL:         %.2f min', (f_total))
-	log.info('AVERAGE:       %.2f min/XOs', average)
+	log.info('SCHOOL:               %s', school)
+	log.info('INTERVAL:             %s-> %s', start, end)
+	log.info('NUMBER OF XOs:        %s', xos)
+	log.info('TOTAL TIME (all XOs): %.2f min', (f_total))
+	log.info('AVERAGE per XO:       %.2f min/XOs', average)
+	log.info('AVERAGE per day:      %.2f min/XOs/day', average_x_day)
 	log.info("**************************************************************************************************************")
 	log.info("\n\n")
 
