@@ -1,10 +1,11 @@
 import mysql.connector
+import sys, os
 from mysql.connector import errorcode
+
 from datetime import datetime
 import logging
 
-
-import sugar_stats_consolidation.rrd_files
+sys.path.append(os.getcwd())
 
 from rrd_files import *
 

@@ -1,8 +1,9 @@
-import rrdtool
 import os
 import sys
 import logging
+import rrdtool
 from datetime import datetime
+
 
 log = logging.getLogger(__name__)
 
