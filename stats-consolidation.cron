@@ -1,0 +1,4 @@
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+BASE_PATH=/home/ceibal/ac/statistics-consolidation
+0 3 * * * root $BASE_PATH/sugar_stats_consolidation/run.sh > $BASE_PATH/log/out.txt
+
