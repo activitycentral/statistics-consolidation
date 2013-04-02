@@ -20,8 +20,7 @@ import argparse
 import sys
 import logging
 
-sys.path.append('/home/gustavo/ac/statistics/stats-consolidation/src/')
-from db import *
+from stats_consolidation.db import *
 
 
 parser = argparse.ArgumentParser()
