@@ -16,9 +16,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
-from sugar_stats_consolidation.db import *
+
 import sys
 import logging
+
+sys.path.append('/home/gustavo/ac/statistics/stats-consolidation/src/')
+from db import *
 
 
 parser = argparse.ArgumentParser()

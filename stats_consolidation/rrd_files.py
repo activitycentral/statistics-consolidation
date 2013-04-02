@@ -5,7 +5,8 @@ import rrdtool
 from datetime import datetime
 
 
-log = logging.getLogger(__name__)
+#log = logging.getLogger(__name__)
+log = logging.getLogger("stats-consolidation")
 
 
 class RRD:

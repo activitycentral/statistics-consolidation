@@ -4,12 +4,9 @@ from mysql.connector import errorcode
 
 from datetime import datetime
 import logging
+from stats_consolidation.rrd_files import *
 
-sys.path.append(os.getcwd())
-
-from rrd_files import *
-
-log = logging.getLogger(__name__)
+log = logging.getLogger("stats-consolidation")
 
 class DB_Stats:
 	TABLES={}

@@ -2,13 +2,12 @@ import os
 import argparse
 import logging
 
-import rrd_files
-import db
-from rrd_files import *
-from db import *
+from stats_consolidation.db import *
+from stats_consolidation.rrd_files import *
 
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("stats-consolidation")
+#log = logging.getLogger(__name__)
 
 class Consolidation:
 	
