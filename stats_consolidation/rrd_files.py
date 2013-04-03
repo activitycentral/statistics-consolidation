@@ -5,7 +5,6 @@ import rrdtool
 from datetime import datetime
 
 
-#log = logging.getLogger(__name__)
 log = logging.getLogger("stats-consolidation")
 
 
@@ -51,26 +50,25 @@ class RRD:
 
 
 
-		print "******************************************"
-		print "     creating a RRD instance               "
-		print "start: " + str(datetime.fromtimestamp(float(self.date_start)))
-		print "end: "  + str(datetime.fromtimestamp(float(self.date_end)))
-		print "PATH: " + path
-		print "RRD NAME: " + name
-		print "\n"
+		log.debug( '*******************************************')
+		log.debug( '     creating a RRD instance               ')
+		log.debug( 'start: %s', str(datetime.fromtimestamp(float(self.date_start))))
+		log.debug( 'end: %s',  str(datetime.fromtimestamp(float(self.date_end))))
+		log.debug( 'PATH: %s', path)
+		log.debug( 'RRD NAME: %s', name)
+		log.debug( '\n')
 		try:
 			self.rrd = rrdtool.fetch (str(os.path.join(path,name)), 'AVERAGE', '-r 60', '-s '+ self.date_start, '-e '+ self.date_end)
 		except Exception as e:
 			raise Exception("rrdtool.fetch: {0}".format(e))
-		print "                   DS                       "			
+		log.debug('                   DS                       ')			
 		for item in self.DS.keys():
 			idx = self.get_ds_index (item)
 			if idx != -1:
 				self.DS[item] = idx
-				print "DS "+ item + ": " + str(self.DS[item])
 			else:
-				print "DS "+ item + " not found in header"
-		print "***********************************************"
+				log.warning( 'DS %s not found in header of %s rrd file', item, name)
+		log.debug('***********************************************')
 
 	def get_ds_index(self, ds): 
 		i=0
@@ -90,7 +88,7 @@ class RRD:
 		i=0
 		found = False
 
-		print "-------Calcule "+ ds_name +"-------"
+		log.debug('-------Calcule %s -------', ds_name)
 		while i < len(self.rrd[self.data_item]):
 			value  = str(self.rrd[self.data_item][i][self.DS[ds_name]])
 
@@ -103,13 +101,15 @@ class RRD:
 			else:
 				if found:
 					if self.verify_interrupt(i, ds_name, prev_value):
-						print str(datetime.fromtimestamp(float(start))) + " -> " + str(datetime.fromtimestamp(float(end))) + ": " + prev_value
+						log.debug( '%s -> %s : %s',str(datetime.fromtimestamp(float(start))), 
+							                   str(datetime.fromtimestamp(float(end))), 
+									   prev_value)
 						res.append((start, prev_value))
 						found = False
 						prev_value = 0.0
 			i=i+1
 		return res
-		print "---------------------------------------------------"
+		log.debug('---------------------------------------------------')
 
 
 	def get_active_by_interval (self):
@@ -122,16 +122,18 @@ class RRD:
 		return self.rrd_name.partition(".rrd")[0]
 
 	def show_valid_ds(self, ds_name):
-		print "------------------- DS "+ ds_name +"---------------------"
+		log.debug('------------------- DS %s ---------------------', ds_name)
 		i=0
 		while i < len(self.rrd[self.data_item]):
 			timestamp = str (long (self.date_start) + ((i+1) * 60))
 			value     = str (self.rrd[self.data_item][i][self.DS[ds_name]])
 	
 			if value != "None":
-				print str(datetime.fromtimestamp(float(timestamp))) + " (" + timestamp + ")" + ": " + value
+				log.debug( '%s (%s): %s',str(datetime.fromtimestamp(float(timestamp))),
+							 timestamp,
+							 value)
 			i=i+1
-		print "---------------------------------------------------"
+		log.debug('---------------------------------------------------')
 
 
 	def get_date_last_record(self):
@@ -183,7 +185,7 @@ class RRD:
 			value  = str(self.rrd[self.data_item][i][self.DS[ds_name]])
 			if value != "None":
 				"""
-				print "["+str(j)+ "] current value: " + value + " prev value: " +  str (float (prev_value) + (60 * j)) + " ("+ prev_value+")"
+				log.debug( "["+str(j)+ "] current value: " + value + " prev value: " +  str (float (prev_value) + (60 * j)) + " ("+ prev_value+")"
 				"""
 				if float(value) > (float (prev_value) + (60 * j)):
 					return False

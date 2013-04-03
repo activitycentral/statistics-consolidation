@@ -32,7 +32,7 @@ parser.add_argument('--config_file', required=False)
 args = parser.parse_args()
 
 
-_LOG_FORMAT='[%(asctime)s]-%(levelname)s-\'%(name)s\': %(message)s'
+_LOG_FORMAT='[%(asctime)s]-%(levelname)s-\'%(filename)s\': %(message)s'
 _LOG_LEVEL = {	'debug': logging.DEBUG,
           	'info': logging.INFO,
           	'warning': logging.WARNING,
@@ -57,10 +57,13 @@ def main():
 	db_user = config.get('main', 'db_user') 
 	db_pass = config.get('main', 'db_pass')
 	rrd_path = config.get('main', 'rrd_path')
+	
 	LOG_FILENAME = os.path.join(log_path,'stats-consolidation.log')
-		
 	# Add the log message handler to the logger
 	handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=10000000, backupCount=5)
+	handler.setFormatter(logging.Formatter(fmt=_LOG_FORMAT))
+	handler.setLevel(_LOG_LEVEL[log_level])
+	
 	log = logging.getLogger("stats-consolidation")
 	log.setLevel(_LOG_LEVEL[log_level])
 	log.addHandler(handler)

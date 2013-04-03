@@ -179,8 +179,9 @@ class DB_Stats:
 				info = (resource_name, )
 				cursor.execute(insert, info)
 				self.cnx.commit()
+				log.info('New Resource %s stored in DB', resource_name)
 		except mysql.connector.Error as err:
-                        log.info('MySQL on store_resource:  %s %s', cursor.statement, err)
+                        log.error('MySQL on store_resource:  %s %s', cursor.statement, err)
 
 		cursor.close()
 
@@ -198,6 +199,7 @@ class DB_Stats:
                 		params = (rrd.get_user_hash(), rrd.get_uuid(), rrd.get_sn(), rrd.get_age(), rrd.get_school(), "1.0.0")
                                 cursor.execute(insert, params)
                                 self.cnx.commit()
+                                log.debug('New User %s stored in DB', rrd.user_hash)
                 except mysql.connector.Error as err:
                         log.error('MySQL on store_user %s %s', cursor.statement, err)
 

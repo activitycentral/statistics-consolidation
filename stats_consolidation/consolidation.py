@@ -7,7 +7,6 @@ from stats_consolidation.rrd_files import *
 
 
 log = logging.getLogger("stats-consolidation")
-#log = logging.getLogger(__name__)
 
 class Consolidation:
 	
