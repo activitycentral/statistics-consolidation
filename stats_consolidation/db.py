@@ -30,7 +30,7 @@ class DB_Stats:
 
 	TABLES['Users'] = (
 		"CREATE TABLE Users("
-                "       `hash` CHAR (40) NOT NULL,"	
+		"       `hash` CHAR (40) NOT NULL,"	
 		"       `uuid` CHAR (32) NOT NULL,"
 		"	`machine_sn` CHAR(80),"
 		"	`age` INTEGER NOT NULL,"
@@ -64,12 +64,12 @@ class DB_Stats:
 			try:
 				log.info('Creating table %s:', name)
 				cursor.execute(ddl)
-		    	except mysql.connector.Error as err:
+			except mysql.connector.Error as err:
 				if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
-			    		log.warning('Table %s already exists.', name)
+					log.warning('Table %s already exists.', name)
 				else:
-			    		raise Exception ("Error: {0}".format(err))
-		    	else:
+					raise Exception ("Error: {0}".format(err))
+			else:
 				log.info('Table %s crated', name)
 
 	def create (self):
@@ -77,16 +77,16 @@ class DB_Stats:
 		cursor = self.cnx.cursor()
 		"""Try connect to db """
 		try:
-		    	self.cnx.database = self.db_name
+			self.cnx.database = self.db_name
 			log.info('Data Base %s already created, will create tables',  self.db_name)
 			self.create_tables(cursor)
 		except mysql.connector.Error as err:
 			"""If db not exist, then create"""
-		    	if err.errno == errorcode.ER_BAD_DB_ERROR:
+			if err.errno == errorcode.ER_BAD_DB_ERROR:
 				self.create_database(cursor)
-		    		self.cnx.database = self.db_name
+				self.cnx.database = self.db_name
 				self.create_tables(cursor)
-		    	else:
+			else:
 				raise Exception ("Error: {0}".format(err))
 		cursor.close()
 	
@@ -100,7 +100,7 @@ class DB_Stats:
 		try:
 			self.cnx = mysql.connector.connect(user=self.user, password=self.password)
 			cursor = self.cnx.cursor()
-		    	self.cnx.database = self.db_name
+			self.cnx.database = self.db_name
 			cursor.close()
 		except mysql.connector.Error as err:
 			raise Exception ("Error: {0}".format(err))
@@ -161,7 +161,7 @@ class DB_Stats:
 				self.cnx.commit()
 
 			except mysql.connector.Error as err:
-                        	log.error('MySQL on store_activiy_time()%s: %s %s', data_type, cursor.statement, err)
+							log.error('MySQL on store_activiy_time()%s: %s %s', data_type, cursor.statement, err)
 		cursor.close()
 	
 
@@ -181,73 +181,73 @@ class DB_Stats:
 				self.cnx.commit()
 				log.info('New Resource %s stored in DB', resource_name)
 		except mysql.connector.Error as err:
-                        log.error('MySQL on store_resource:  %s %s', cursor.statement, err)
+			log.error('MySQL on store_resource:  %s %s', cursor.statement, err)
 
 		cursor.close()
 
 	def store_user (self, rrd):
 		cursor = self.cnx.cursor()
-                op = ("SELECT hash FROM Users WHERE hash = %s")
-                params = (rrd.get_user_hash(), )
-                try:    
-                        cursor.execute(op, params)
-                        result = cursor.fetchone()
-                        if result != None:
-                                log.debug('User %s already in DB', rrd.user_hash)
-                        else:
-                                insert = ("INSERT INTO Users (hash, uuid, machine_sn, age, school, sw_version) VALUES (%s, %s, %s, %s, %s, %s)")
-                		params = (rrd.get_user_hash(), rrd.get_uuid(), rrd.get_sn(), rrd.get_age(), rrd.get_school(), "1.0.0")
-                                cursor.execute(insert, params)
-                                self.cnx.commit()
-                                log.debug('New User %s stored in DB', rrd.user_hash)
-                except mysql.connector.Error as err:
-                        log.error('MySQL on store_user %s %s', cursor.statement, err)
+		op = ("SELECT hash FROM Users WHERE hash = %s")
+		params = (rrd.get_user_hash(), )
+		try:    
+			cursor.execute(op, params)
+			result = cursor.fetchone()
+			if result != None:
+				log.debug('User %s already in DB', rrd.user_hash)
+			else:
+				insert = ("INSERT INTO Users (hash, uuid, machine_sn, age, school, sw_version) VALUES (%s, %s, %s, %s, %s, %s)")
+				params = (rrd.get_user_hash(), rrd.get_uuid(), rrd.get_sn(), rrd.get_age(), rrd.get_school(), "1.0.0")
+				cursor.execute(insert, params)
+				self.cnx.commit()
+				log.debug('New User %s stored in DB', rrd.user_hash)
+		except mysql.connector.Error as err:
+			log.error('MySQL on store_user %s %s', cursor.statement, err)
 
-                cursor.close()
+		cursor.close()
 
 
 
 	def update_last_record (self):
 		cursor = self.cnx.cursor()
 		res = 0
-                op = ("SELECT * FROM Runs")
-                try:
+		op = ("SELECT * FROM Runs")
+		try:
 			cursor.execute(op)
 			result = cursor.fetchone()
 
 			if result != None:
 				op = ("UPDATE Runs SET last_ts = CURRENT_TIMESTAMP")
-                		cursor.execute(op)
+				cursor.execute(op)
 				self.cnx.commit()
 			else:
 				op = ("INSERT INTO Runs VALUES(CURRENT_TIMESTAMP)")
 				cursor.execute(op)
 				self.cnx.commit()
 			log.info("Save last record");
-                except mysql.connector.Error as err:
-                        log.error('MySQL on update_last_record: %s %s', cursor.statement, err)
+		except mysql.connector.Error as err:
+			log.error('MySQL on update_last_record: %s %s', cursor.statement, err)
 			res = -1
 
-                cursor.close()
+		cursor.close()
 		return res
 
 	def get_date_last_record (self):
 		cursor = self.cnx.cursor()
-                op = ("SELECT UNIX_TIMESTAMP ((SELECT last_ts FROM Runs))")
-                try:
-                        cursor.execute(op)
+		op = ("SELECT UNIX_TIMESTAMP ((SELECT last_ts FROM Runs))")
+		try:
+			cursor.execute(op)
 			result = cursor.fetchone()
 			if result != None and result[0] != None:
 				log.info('Last record: %s', str(datetime.fromtimestamp (float (result[0]))))
 				return result[0]
-                        else:
-                                log.info('Last date record is None')
+			else:
+				log.info('Last date record is None')
 				return 0
-                except mysql.connector.Error as err:
-                        log.error('MySQL on get_date_last_record: %s %s',cursor.statement, err)
+		except mysql.connector.Error as err:
+			log.error('MySQL on get_date_last_record: %s %s',cursor.statement, err)
 		except Exception as e:
 			raise Exception ("get_date_last_record: {0}".format(e))
-                cursor.close()
+		cursor.close()
 
 
 
@@ -262,13 +262,13 @@ class DB_Stats:
 		focus = 0
 		uptime = 0
 		ts_start = self.date_to_ts(start)
-        	ts_end   = self.date_to_ts(end)
+		ts_end   = self.date_to_ts(end)
 			
 		cursor1 = self.cnx.cursor()
 		cursor2 = self.cnx.cursor()
-                try:
+		try:
 			if school != None:
-                		select_usage = "SELECT SUM(data) FROM Usages WHERE (resource_name = %s)  AND (start_date > %s) AND (start_date < %s) AND (data_type = %s) AND (user_hash = %s)"
+				select_usage = "SELECT SUM(data) FROM Usages WHERE (resource_name = %s)  AND (start_date > %s) AND (start_date < %s) AND (data_type = %s) AND (user_hash = %s)"
 				
 				log.debug('Activiy time by school: %s', school)
 				""" Get user hash from a School"""
@@ -285,7 +285,7 @@ class DB_Stats:
 					uptime = float (cursor2.fetchone()[0]) + uptime
 				
 			else:
-                		select_usage = "SELECT SUM(data) FROM Usages WHERE (resource_name = %s)  AND (start_date > %s) AND (start_date < %s) AND (data_type = %s)"
+				select_usage = "SELECT SUM(data) FROM Usages WHERE (resource_name = %s)  AND (start_date > %s) AND (start_date < %s) AND (data_type = %s)"
 				params_focus = (activity, ts_start, ts_end, 'active')
 				params_uptime = (activity, ts_start, ts_end, 'uptime')
 				cursor2.execute(select_usage, params_focus)
@@ -295,14 +295,14 @@ class DB_Stats:
 			
 			log.debug('Times of (%s) from: %s -> %s: Uptime: %s, Focus: %s', activity, start, end, uptime, focus)
 			
-                	
+					
 			cursor1.close()
 			cursor2.close()
 			return (uptime, focus)
 		except mysql.connector.Error as err:
 			log.error('MySQL on rep_activity_time %s', err)
 		except Exception as e:
-                        log.error('MySQL on rep_activity_time : %s', e)
+			log.error('MySQL on rep_activity_time : %s', e)
 		return (None, None)
 
 
@@ -338,7 +338,7 @@ class DB_Stats:
 			
 
 			ts_start = self.date_to_ts(start)
-        		ts_end   = self.date_to_ts(end)
+			ts_end   = self.date_to_ts(end)
 
 
 			for resource in resources:
@@ -361,12 +361,12 @@ class DB_Stats:
 						res_list.append((resource[0], focus))
 						
 		except  mysql.connector.Error as err:
-                        log.error('MySQL on most_activity_used %s', err)
-                except Exception as e:
-                        log.error('most_activity_used  Fail: %s', e)
-                cursor1.close()
-                cursor2.close()
-                cursor3.close()
+			log.error('MySQL on most_activity_used %s', err)
+		except Exception as e:
+			log.error('most_activity_used  Fail: %s', e)
+		cursor1.close()
+		cursor2.close()
+		cursor3.close()
 		log.debug ('Activities: %s', sorted(res_list, key=lambda x: x[1], reverse=True))
 		return sorted(res_list, key=lambda x: x[1], reverse=True)		
 
@@ -376,10 +376,10 @@ class DB_Stats:
 		cursor1 = self.cnx.cursor()
 		cursor2 = self.cnx.cursor()
 		user_hashes=()
-                time = 0
+		time = 0
 		try:
 			ts_start = self.date_to_ts(start)
-        		ts_end   = self.date_to_ts(end)
+			ts_end   = self.date_to_ts(end)
 			
 			if school != None:
 				log.debug('Frequency usage by school: %s', school)
@@ -403,7 +403,7 @@ class DB_Stats:
 				
 
 		except mysql.connector.Error as err:
-                        log.error("MySQL on %s: %s", cursor.statement, err)
+			log.error("MySQL on %s: %s", cursor.statement, err)
 		cursor1.close()	
 		cursor2.close()	
 
@@ -421,7 +421,7 @@ class DB_Stats:
 		cursor.close()
 
 #=========================================================================================================
-#				     A U X I L I A R   M E T H O D S
+#					 A U X I L I A R   M E T H O D S
 #=========================================================================================================
 	def is_an_activity(self, name):
 		if (name != 'system') and (name != 'journal') and (name != 'network') and (name != 'shell'):
