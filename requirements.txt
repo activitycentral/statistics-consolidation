@@ -1,0 +1,2 @@
+mysql-connector-python==1.0.10
+python-rrdtool==1.4.7
