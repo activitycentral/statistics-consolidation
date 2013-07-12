@@ -21,6 +21,10 @@ import logging
 import logging.handlers
 import sys, os
 
+# FIXME: Use relative import or change path 
+basedir = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(basedir)
+
 from stats_consolidation.db import *
 from stats_consolidation.rrd_files import *
 from stats_consolidation.consolidation import *
