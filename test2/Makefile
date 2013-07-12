@@ -15,3 +15,7 @@ run:
 	../stats_consolidation/stats_consolidation_run --config_file test.conf
 
 test: dropdb run crc
+
+clean:
+	rm -rf log/*
+	rm crc_test.txt
