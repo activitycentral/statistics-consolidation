@@ -4,7 +4,6 @@ from datetime import datetime
 import mysql.connector
 from mysql.connector import errorcode
 
-from stats_consolidation.rrd_files import *
 
 log = logging.getLogger("stats-consolidation")
 
