@@ -1,9 +1,9 @@
+import logging
+from datetime import datetime
+
 import mysql.connector
-import sys, os
 from mysql.connector import errorcode
 
-from datetime import datetime
-import logging
 from stats_consolidation.rrd_files import *
 
 log = logging.getLogger("stats-consolidation")
