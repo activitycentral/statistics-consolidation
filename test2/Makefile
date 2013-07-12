@@ -1,4 +1,4 @@
-.PHONY: dropdb crc run test
+.PHONY: dropdb crc run test .coverage coverage
 
 MYSQL_ARGS=--user=sc --password=sc
 MYSQL_CLI=mysql $(MYSQL_ARGS) sc 
@@ -19,3 +19,12 @@ test: dropdb run crc
 clean:
 	rm -rf log/*
 	rm crc_test.txt
+	rm .coverage
+	rm -rf htmlcov/
+
+.coverage: dropdb
+	python ../.venv/bin/coverage run --source=../stats_consolidation  \
+		../stats_consolidation/stats_consolidation_run --config_file test.conf
+
+coverage: .coverage
+	coverage html
