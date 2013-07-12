@@ -22,9 +22,13 @@ clean:
 	rm .coverage
 	rm -rf htmlcov/
 
+COVERAGE=python ../.venv/bin/coverage run --source=../stats_consolidation,../sql 
+
 .coverage: dropdb
-	python ../.venv/bin/coverage run --source=../stats_consolidation  \
+	$(COVERAGE)\
 		../stats_consolidation/stats_consolidation_run --config_file test.conf
+	$(COVERAGE) -a\
+		../sql/make_report --query activity_time --db_name sc --db_user sc --db_pass sc --start_date 2013-01-01 --end_date 2013-12-12
 
 coverage: .coverage
 	coverage html
