@@ -18,8 +18,8 @@ test: dropdb run crc
 
 clean:
 	rm -rf log/*
-	rm crc_test.txt
-	rm .coverage
+	rm -f crc_test.txt
+	rm -f .coverage
 	rm -rf htmlcov/
 
 COVERAGE=python ../.venv/bin/coverage run --source=../stats_consolidation,../sql 
