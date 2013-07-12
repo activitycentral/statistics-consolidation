@@ -24,7 +24,7 @@ class Report:
 	STAT={}
 	STAT ['Get_resource_name'] = ("SELECT name FROM `Resources`")
 
-	STAT ['Get_suma_uptime'] = ( "SELECT SUM (`data`) FROM Usages (WHERE `resource_name` = %s" AND data_type = 'active')
+	STAT ['Get_suma_uptime'] = ( "SELECT SUM (`data`) FROM Usages (WHERE `resource_name` = %s AND data_type = 'active')")
 
 	STAT ['Get_frequency_usage'] = ("SELECT SUM(`data`) FROM Usages ((WHERE `resource_name` = `system`) AND (start_date > start) AND (start_date < end))")
 	
