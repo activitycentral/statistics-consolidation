@@ -4,8 +4,25 @@ from datetime import datetime
 import mysql.connector
 from mysql.connector import errorcode
 
+import sqlalchemy as sa
 
 log = logging.getLogger("stats-consolidation")
+
+
+class Connection(object):
+    """Transitional class"""
+    def __init__(self, engine):
+        self._connection = engine.connect()
+
+    def cursor(self):
+        return self._connection
+
+    def close(self):
+        return self._connection.close()
+
+    def commit(self):
+        return None
+
 
 class DB_Stats:
     TABLES={}
@@ -96,6 +113,16 @@ class DB_Stats:
         self.cnx.close()
 
     def connect (self):
+        database_url = 'mysql+mysqlconnector://{user}:{password}@localhost/{db_name}'
+        engine = sa.create_engine(database_url.format(
+            user=self.user,
+            password=self.password,
+            db_name=self.db_name)
+        )
+        self.cnx = Connection(engine)
+        return self.cnx
+
+
         try:
             self.cnx = mysql.connector.connect(user=self.user, password=self.password)
             cursor = self.cnx.cursor()
