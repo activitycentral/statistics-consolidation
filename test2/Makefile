@@ -8,7 +8,7 @@ MYSQL_DUMP=mysqldump $(MYSQL_ARGS) sc
 ALL: coverage
 
 dropdb:
-	-$(MYSQL_CLI) --execute="DROP DATABASE sc; CREATE DATABASE sc;"
+	-$(MYSQL_CLI) --execute="DROP DATABASE sc;"
 
 createdb:
 	-$(MYSQL_CLI_0) --execute="CREATE DATABASE IF NOT EXISTS sc;"
@@ -20,7 +20,7 @@ crc:
 run:
 	../stats_consolidation/stats_consolidation_run --config_file test.conf
 
-test: dropdb run crc
+test: dropdb createdb run crc
 
 clean:
 	rm -rf log/*
@@ -30,7 +30,7 @@ clean:
 
 COVERAGE=python ../.venv/bin/coverage run --source=../stats_consolidation,../sql
 
-.coverage: dropdb
+.coverage: dropdb createdb
 	$(COVERAGE)\
 		../stats_consolidation/stats_consolidation_run --config_file test.conf
 	$(COVERAGE) -a\
