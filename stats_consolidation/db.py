@@ -160,8 +160,8 @@ class DB_Stats:
                 self.cnx.commit()
 
             except mysql.connector.Error as err:
-        cursor.close()
                             log.error('MySQL on store_activiy_time()%s: %s %s', data_type, 'cursor.statement', err)
+        # cursor.close()  # Not need
 
 
     def store_resource(self, resource_name):
@@ -182,7 +182,7 @@ class DB_Stats:
         except mysql.connector.Error as err:
             log.error('MySQL on store_resource:  %s %s', 'cursor.statement', err)
 
-        cursor.close()
+        # cursor.close()  # Not need
 
     def store_user (self, rrd):
         cursor = self.cnx.cursor()
@@ -202,7 +202,7 @@ class DB_Stats:
         except mysql.connector.Error as err:
             log.error('MySQL on store_user %s %s', 'cursor.statement', err)
 
-        cursor.close()
+        # cursor.close()  # Not need
 
 
 
@@ -227,7 +227,7 @@ class DB_Stats:
             log.error('MySQL on update_last_record: %s %s', 'cursor.statement', err)
             res = -1
 
-        cursor.close()
+        # cursor.close()  # Not need
         return res
 
     def get_date_last_record (self):
@@ -246,7 +246,7 @@ class DB_Stats:
             log.error('MySQL on get_date_last_record: %s %s','cursor.statement', err)
         except Exception as e:
             raise Exception ("get_date_last_record: {0}".format(e))
-        cursor.close()
+        # cursor.close()  # Not need
 
 
 
@@ -271,32 +271,32 @@ class DB_Stats:
 
                 log.debug('Activiy time by school: %s', school)
                 """ Get user hash from a School"""
-                cursor1.execute ("SELECT hash FROM Users WHERE school = %s", (school,))
-                user_hashes = cursor1.fetchall()
+                result1 = cursor1.execute ("SELECT hash FROM Users WHERE school = %s", (school,))
+                user_hashes = result1.fetchall()
                 for user_hash in user_hashes:
                     log.debug('user Hash: %s', user_hash[0])
                     params_focus = (activity, ts_start, ts_end, 'active', user_hash[0])
                     params_uptime = (activity, ts_start, ts_end, 'uptime', user_hash[0])
 
-                    cursor2.execute(select_usage, params_focus)
-                    focus = float (cursor2.fetchone()[0]) + focus
-                    cursor2.execute(select_usage, params_uptime)
-                    uptime = float (cursor2.fetchone()[0]) + uptime
+                    result2 = cursor2.execute(select_usage, params_focus)
+                    focus = float (result2.fetchone()[0]) + focus
+                    result2 = cursor2.execute(select_usage, params_uptime)
+                    uptime = float (result2.fetchone()[0]) + uptime
 
             else:
                 select_usage = "SELECT SUM(data) FROM Usages WHERE (resource_name = %s)  AND (start_date > %s) AND (start_date < %s) AND (data_type = %s)"
                 params_focus = (activity, ts_start, ts_end, 'active')
                 params_uptime = (activity, ts_start, ts_end, 'uptime')
-                cursor2.execute(select_usage, params_focus)
-                focus = float(cursor2.fetchone()[0])
-                cursor2.execute(select_usage, params_uptime)
-                uptime = float(cursor2.fetchone()[0])
+                result2 = cursor2.execute(select_usage, params_focus)
+                focus = float(result2.fetchone()[0])
+                result2 = cursor2.execute(select_usage, params_uptime)
+                uptime = float(result2.fetchone()[0])
 
             log.debug('Times of (%s) from: %s -> %s: Uptime: %s, Focus: %s', activity, start, end, uptime, focus)
 
 
-            cursor1.close()
-            cursor2.close()
+            # cursor1.close()  # Not need
+            # cursor2.close()  # Not need
             return (uptime, focus)
         except mysql.connector.Error as err:
             log.error('MySQL on rep_activity_time %s', err)
@@ -313,20 +313,20 @@ class DB_Stats:
         cursor3 = self.cnx.cursor()
 
         if desktop == 'gnome':
-            cursor2.execute("SELECT name FROM Resources WHERE name REGEXP 'application'")
+            result2 = cursor2.execute("SELECT name FROM Resources WHERE name REGEXP 'application'")
         elif desktop == 'sugar':
-            cursor2.execute("SELECT name FROM Resources WHERE name REGEXP 'activity'")
+            result2 = cursor2.execute("SELECT name FROM Resources WHERE name REGEXP 'activity'")
         else:
-            cursor2.execute("SELECT name FROM Resources")
+            result2 = cursor2.execute("SELECT name FROM Resources")
 
-        resources = cursor2.fetchall()
+        resources = result2.fetchall()
 
         try:
             if school != None:
                 log.debug('Most activiy used by school: %s', school)
                 """ Get user hash from a School"""
-                cursor1.execute ("SELECT hash FROM Users WHERE school = %s", (school,))
-                user_hashes = cursor1.fetchall()
+                result1 = cursor1.execute ("SELECT hash FROM Users WHERE school = %s", (school,))
+                user_hashes = result1.fetchall()
                 """ Cursor for select resources from Uages table"""
                 select_usage = "SELECT SUM(data) FROM Usages WHERE (resource_name = %s) AND (start_date > %s) AND (start_date < %s) AND (data_type = 'active') AND (user_hash = %s)"
             else:
@@ -346,15 +346,15 @@ class DB_Stats:
                     if school != None:
                         for user_hash in user_hashes:
                             log.debug('user Hash: %s', user_hash[0])
-                            cursor3.execute(select_usage, (resource[0], ts_start, ts_end, user_hash[0]))
-                            focus = cursor3.fetchone()[0]
+                            result3 = cursor3.execute(select_usage, (resource[0], ts_start, ts_end, user_hash[0]))
+                            focus = result3.fetchone()[0]
                             if focus == None: focus = 0
 
                             log.debug('Focus time: %s', focus)
                             res_list.append((resource[0], focus))
                     else:
-                        cursor3.execute(select_usage, (resource[0], ts_start, ts_end))
-                        focus = cursor3.fetchone()[0]
+                        result3 = cursor3.execute(select_usage, (resource[0], ts_start, ts_end))
+                        focus = result3.fetchone()[0]
                         if focus == None: focus = 0
                         log.debug('Focus time: %s', focus )
                         res_list.append((resource[0], focus))
@@ -363,9 +363,9 @@ class DB_Stats:
             log.error('MySQL on most_activity_used %s', err)
         except Exception as e:
             log.error('most_activity_used  Fail: %s', e)
-        cursor1.close()
-        cursor2.close()
-        cursor3.close()
+        # cursor1.close()  # Not need
+        # cursor2.close()  # Not need
+        # cursor3.close()  # Not need
         log.debug ('Activities: %s', sorted(res_list, key=lambda x: x[1], reverse=True))
         return sorted(res_list, key=lambda x: x[1], reverse=True)
 
@@ -383,28 +383,28 @@ class DB_Stats:
             if school != None:
                 log.debug('Frequency usage by school: %s', school)
                 """ Get user hash from a School"""
-                cursor1.execute ("SELECT hash FROM Users WHERE school = %s", (school,))
-                user_hashes = cursor1.fetchall()
+                result1 = cursor1.execute ("SELECT hash FROM Users WHERE school = %s", (school,))
+                user_hashes = result1.fetchall()
 
                 for user_hash in user_hashes:
-                    cursor2.execute("SELECT SUM(data) FROM Usages WHERE (resource_name = 'system') AND (start_date > %s) AND (start_date < %s) AND (data_type = 'uptime') AND (user_hash = %s)", (ts_start, ts_end, user_hash[0]))
-                    res = cursor2.fetchone()
+                    result2 = cursor2.execute("SELECT SUM(data) FROM Usages WHERE (resource_name = 'system') AND (start_date > %s) AND (start_date < %s) AND (data_type = 'uptime') AND (user_hash = %s)", (ts_start, ts_end, user_hash[0]))
+                    res = result2.fetchone()
                     if res != None and res[0] != None:
                         time = float (res[0]) + time
             else:
                 log.debug('Frequency usage')
-                cursor1.execute ("SELECT hash FROM Users")
-                user_hashes = cursor1.fetchall()
-                cursor2.execute("SELECT SUM(data) FROM Usages WHERE (resource_name = 'system') AND (start_date > %s) AND (start_date < %s) AND (data_type = 'uptime')", (ts_start, ts_end))
-                time = cursor2.fetchone()[0]
+                result1 = cursor1.execute ("SELECT hash FROM Users")
+                user_hashes = result1.fetchall()
+                result2 = cursor2.execute("SELECT SUM(data) FROM Usages WHERE (resource_name = 'system') AND (start_date > %s) AND (start_date < %s) AND (data_type = 'uptime')", (ts_start, ts_end))
+                time = result2.fetchone()[0]
 
             return (time, len(user_hashes))
 
 
         except mysql.connector.Error as err:
-            log.error("MySQL on %s: %s", cursor.statement, err)
-        cursor1.close()
-        cursor2.close()
+            log.error("MySQL on %s: %s", 'cursor.statement', err)
+        # cursor1.close()  # Not need
+        # cursor2.close()  # Not need
 
 
     def rep_update_school(self, machine_sn, school):
@@ -417,7 +417,7 @@ class DB_Stats:
         else:
             self.cnx.commit()
 
-        cursor.close()
+        # cursor.close()  # Not need
 
 #=========================================================================================================
 #                    A U X I L I A R   M E T H O D S
