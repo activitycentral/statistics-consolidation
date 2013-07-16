@@ -160,8 +160,8 @@ class DB_Stats:
                 self.cnx.commit()
 
             except mysql.connector.Error as err:
-                            log.error('MySQL on store_activiy_time()%s: %s %s', data_type, cursor.statement, err)
         cursor.close()
+                            log.error('MySQL on store_activiy_time()%s: %s %s', data_type, 'cursor.statement', err)
 
 
     def store_resource(self, resource_name):
@@ -180,7 +180,7 @@ class DB_Stats:
                 self.cnx.commit()
                 log.info('New Resource %s stored in DB', resource_name)
         except mysql.connector.Error as err:
-            log.error('MySQL on store_resource:  %s %s', cursor.statement, err)
+            log.error('MySQL on store_resource:  %s %s', 'cursor.statement', err)
 
         cursor.close()
 
@@ -200,7 +200,7 @@ class DB_Stats:
                 self.cnx.commit()
                 log.debug('New User %s stored in DB', rrd.user_hash)
         except mysql.connector.Error as err:
-            log.error('MySQL on store_user %s %s', cursor.statement, err)
+            log.error('MySQL on store_user %s %s', 'cursor.statement', err)
 
         cursor.close()
 
@@ -224,7 +224,7 @@ class DB_Stats:
                 self.cnx.commit()
             log.info("Save last record");
         except mysql.connector.Error as err:
-            log.error('MySQL on update_last_record: %s %s', cursor.statement, err)
+            log.error('MySQL on update_last_record: %s %s', 'cursor.statement', err)
             res = -1
 
         cursor.close()
@@ -243,7 +243,7 @@ class DB_Stats:
                 log.info('Last date record is None')
                 return 0
         except mysql.connector.Error as err:
-            log.error('MySQL on get_date_last_record: %s %s',cursor.statement, err)
+            log.error('MySQL on get_date_last_record: %s %s','cursor.statement', err)
         except Exception as e:
             raise Exception ("get_date_last_record: {0}".format(e))
         cursor.close()
@@ -413,7 +413,7 @@ class DB_Stats:
             log.debug("Set school name: %s to user with machine_sn: %s", school, machine_sn)
             cursor.execute ("UPDATE Users SET school = %s WHERE machine_sn = %s", (school, machine_sn))
         except mysql.connector.Error as err:
-            log.error("MySQL on %s: %s", cursor.statement, err)
+            log.error("MySQL on %s: %s", 'cursor.statement', err)
         else:
             self.cnx.commit()
 
