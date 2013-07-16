@@ -97,13 +97,7 @@ class DB_Stats:
             log.info('Data Base %s already created, will create tables',  self.db_name)
             self.create_tables(cursor)
         except mysql.connector.Error as err:
-            """If db not exist, then create"""
-            if err.errno == errorcode.ER_BAD_DB_ERROR:
-                self.create_database(cursor)
-                self.cnx.database = self.db_name
-                self.create_tables(cursor)
-            else:
-                raise Exception ("Error: {0}".format(err))
+            raise Exception ("Error: {0}".format(err))
         cursor.close()
 
 
