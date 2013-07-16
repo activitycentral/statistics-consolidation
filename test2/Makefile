@@ -1,13 +1,17 @@
 .PHONY: dropdb crc run test .coverage coverage
 
 MYSQL_ARGS=--user=sc --password=sc
+MYSQL_CLI_0=mysql $(MYSQL_ARGS)
 MYSQL_CLI=mysql $(MYSQL_ARGS) sc
 MYSQL_DUMP=mysqldump $(MYSQL_ARGS) sc
 
 ALL: coverage
 
 dropdb:
-	$(MYSQL_CLI) --execute="DROP DATABASE sc;"
+	-$(MYSQL_CLI) --execute="DROP DATABASE sc; CREATE DATABASE sc;"
+
+createdb:
+	-$(MYSQL_CLI_0) --execute="CREATE DATABASE IF NOT EXISTS sc;"
 
 crc:
 	$(MYSQL_CLI) --batch < crc.sql > crc_test.txt
