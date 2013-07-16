@@ -1,8 +1,10 @@
 .PHONY: dropdb crc run test .coverage coverage
 
 MYSQL_ARGS=--user=sc --password=sc
-MYSQL_CLI=mysql $(MYSQL_ARGS) sc 
+MYSQL_CLI=mysql $(MYSQL_ARGS) sc
 MYSQL_DUMP=mysqldump $(MYSQL_ARGS) sc
+
+ALL: coverage
 
 dropdb:
 	$(MYSQL_CLI) --execute="DROP DATABASE sc;"
@@ -22,7 +24,7 @@ clean:
 	rm -f .coverage
 	rm -rf htmlcov/
 
-COVERAGE=python ../.venv/bin/coverage run --source=../stats_consolidation,../sql 
+COVERAGE=python ../.venv/bin/coverage run --source=../stats_consolidation,../sql
 
 .coverage: dropdb
 	$(COVERAGE)\
