@@ -73,12 +73,9 @@ class DB_Stats:
                 log.info('Creating table %s:', name)
                 cursor.execute(ddl)
             except sa.exc.DBAPIError as err:
-                if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
-                    log.warning('Table %s already exists.', name)
-                else:
-                    raise Exception ("Error: {0}".format(err))
+                raise err
             else:
-                log.info('Table %s crated', name)
+                log.info('Table %s created', name)
 
     def create (self):
         self.connect()

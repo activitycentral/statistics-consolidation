@@ -33,6 +33,8 @@ COVERAGE=python ../.venv/bin/coverage run --source=../stats_consolidation,../sql
 .coverage: dropdb createdb
 	$(COVERAGE)\
 		../stats_consolidation/stats_consolidation_run --config_file test.conf
+	$(COVERAGE)\
+		../stats_consolidation/stats_consolidation_run --config_file test.conf
 	$(COVERAGE) -a\
 		../sql/make_report --query all --db_name sc --db_user sc --db_pass sc --start_date 2013-01-01 --end_date 2013-12-12
 	$(COVERAGE) -a\
