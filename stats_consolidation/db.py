@@ -88,16 +88,18 @@ class DB_Stats:
     def close (self):
         self.cnx.close()
 
-    def connect (self):
+    def _get_engine(self):
         database_url = 'mysql+mysqlconnector://{user}:{password}@localhost/{db_name}'
         engine = sa.create_engine(database_url.format(
             user=self.user,
             password=self.password,
             db_name=self.db_name)
         )
-        self.cnx = Connection(engine)
-        return self.cnx
+        return engine
 
+    def connect (self):
+        self.cnx = Connection(self._get_engine())
+        return self.cnx
 
 #=========================================================================================================
 #               Q U E R I E S   S A V E   M E T H O D S
