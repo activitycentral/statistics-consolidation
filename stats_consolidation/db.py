@@ -67,14 +67,6 @@ class DB_Stats:
         self.user = user
         self.password = password
 
-
-    def create_database(self, cursor):
-        try:
-            cursor.execute(
-            "CREATE DATABASE {0} DEFAULT CHARACTER SET 'utf8'".format(self.db_name))
-        except sa.exc.DBAPIError as err:
-            raise Exception ("Failed creating database: {0}".format(err))
-
     def create_tables(self, cursor):
         for name, ddl in self.TABLES.iteritems():
             try:
@@ -89,21 +81,12 @@ class DB_Stats:
                 log.info('Table %s crated', name)
 
     def create (self):
-        self.cnx = mysql.connector.connect(user=self.user, password=self.password)
+        self.connect()
         cursor = self.cnx.cursor()
-        """Try connect to db """
         try:
-            self.cnx.database = self.db_name
-            log.info('Data Base %s already created, will create tables',  self.db_name)
             self.create_tables(cursor)
         except sa.exc.DBAPIError as err:
             raise Exception ("Error: {0}".format(err))
-        cursor.close()
-        # IMPORTANT: Reconnect this time using SQLAlchemy
-        self.connect()
-
-
-
 
     def close (self):
         self.cnx.close()
