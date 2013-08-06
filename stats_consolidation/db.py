@@ -27,7 +27,7 @@ class Connection(object):
 
 class DB_Stats:
     def __init__(self,  db_name, user, password):
-        self.db_name  = db_name
+        self.db_name = db_name
         self.user = user
         self.password = password
 
@@ -118,7 +118,7 @@ class DB_Stats:
         )
         return engine
 
-    def connect (self):
+    def connect(self):
         self.cnx = Connection(self._get_engine())
         return self.cnx
 
@@ -126,16 +126,13 @@ class DB_Stats:
 #               Q U E R I E S   S A V E   M E T H O D S
 #=========================================================================================================
 
-    def store_activity_uptime (self, rrd):
-        self.store_activity_time (rrd, 'uptime')
+    def store_activity_uptime(self, rrd):
+        self.store_activity_time(rrd, 'uptime')
 
-    def store_activity_focus_time (self, rrd):
+    def store_activity_focus_time(self, rrd):
         self.store_activity_time(rrd, 'active')
 
-
-
     def store_activity_time(self, rrd, data_type):
-
         self.store_resource(rrd.get_name())
         self.store_user(rrd)
 
@@ -159,19 +156,19 @@ class DB_Stats:
                 "VALUES (%s, %s, %s, %s ,%s) ")
 
         for d in rrd.get_last_value_by_interval(data_type):
-            info_sel = (rrd.get_user_hash(), rrd.get_name() , datetime.fromtimestamp(float(d[0])), data_type)
+            info_sel = (rrd.get_user_hash(), rrd.get_name(), datetime.fromtimestamp(float(d[0])), data_type)
             try:
                 """Verify if this activity has an entry already at the same start_date"""
-                result_proxy = cursor.execute (select, info_sel)
+                result_proxy = cursor.execute(select, info_sel)
                 result = result_proxy.fetchone()
 
                 if result != None:
                     log.info('Update %s \'%s\' entry for resource \'%s\' ', data_type, d[1], rrd.get_name())
-                    info_up = (d[1], rrd.get_user_hash(), rrd.get_name() , datetime.fromtimestamp(float(d[0])), data_type)
+                    info_up = (d[1], rrd.get_user_hash(), rrd.get_name(), datetime.fromtimestamp(float(d[0])), data_type)
                     cursor.execute(update, info_up)
                 else:
                     log.info('New %s \'%s\' entry for resource \'%s\'', data_type, d[1], rrd.get_name())
-                    info_ins = (rrd.get_user_hash(), rrd.get_name() , datetime.fromtimestamp(float(d[0])), data_type, d[1])
+                    info_ins = (rrd.get_user_hash(), rrd.get_name(), datetime.fromtimestamp(float(d[0])), data_type, d[1])
                     cursor.execute(insert, info_ins)
 
                 self.cnx.commit()
@@ -179,7 +176,6 @@ class DB_Stats:
             except sa.exc.DBAPIError as err:
                             log.error('MySQL on store_activiy_time()%s: %s %s', data_type, 'cursor.statement', err)
         # cursor.close()  # Not need
-
 
     def store_resource(self, resource_name):
         cursor = self.cnx.cursor()
@@ -201,7 +197,7 @@ class DB_Stats:
 
         # cursor.close()  # Not need
 
-    def store_user (self, rrd):
+    def store_user(self, rrd):
         cursor = self.cnx.cursor()
         op = ("SELECT hash FROM Users WHERE hash = %s")
         params = (rrd.get_user_hash(), )
@@ -221,9 +217,7 @@ class DB_Stats:
 
         # cursor.close()  # Not need
 
-
-
-    def update_last_record (self):
+    def update_last_record(self):
         cursor = self.cnx.cursor()
         res = 0
         op = ("SELECT * FROM Runs")
@@ -239,7 +233,7 @@ class DB_Stats:
                 op = ("INSERT INTO Runs VALUES(CURRENT_TIMESTAMP)")
                 cursor.execute(op)
                 self.cnx.commit()
-            log.info("Save last record");
+            log.info("Save last record")
         except sa.exc.DBAPIError as err:
             log.error('MySQL on update_last_record: %s %s', 'cursor.statement', err)
             res = -1
@@ -247,39 +241,35 @@ class DB_Stats:
         # cursor.close()  # Not need
         return res
 
-    def get_date_last_record (self):
+    def get_date_last_record(self):
         cursor = self.cnx.cursor()
         op = ("SELECT UNIX_TIMESTAMP ((SELECT last_ts FROM Runs))")
         try:
             result_proxy = cursor.execute(op)
             result = result_proxy.fetchone()
             if result != None and result[0] != None:
-                log.info('Last record: %s', str(datetime.fromtimestamp (float (result[0]))))
+                log.info('Last record: %s', str(datetime.fromtimestamp(float(result[0]))))
                 return result[0]
             else:
                 log.info('Last date record is None')
                 return 0
         except sa.exc.DBAPIError as err:
-            log.error('MySQL on get_date_last_record: %s %s','cursor.statement', err)
+            log.error('MySQL on get_date_last_record: %s %s', 'cursor.statement', err)
         except Exception as e:
             log.error(e)
-            raise Exception ("get_date_last_record: {0}".format(e))
+            raise Exception("get_date_last_record: {0}".format(e))
         # cursor.close()  # Not need
-
-
-
-
 
 #=========================================================================================================
 #               R E P O R T   M E T H O D S
 #=========================================================================================================
-    def rep_activity_time (self, start, end, activity, school=None):
-        uptime_last=0
-        activity_name=''
+    def rep_activity_time(self, start, end, activity, school=None):
+        uptime_last = 0
+        activity_name = ''
         focus = 0
         uptime = 0
         ts_start = self.date_to_ts(start)
-        ts_end   = self.date_to_ts(end)
+        ts_end = self.date_to_ts(end)
 
         cursor1 = self.cnx.cursor()
         cursor2 = self.cnx.cursor()
@@ -289,7 +279,7 @@ class DB_Stats:
 
                 log.debug('Activiy time by school: %s', school)
                 """ Get user hash from a School"""
-                result1 = cursor1.execute ("SELECT hash FROM Users WHERE school = %s", (school,))
+                result1 = cursor1.execute("SELECT hash FROM Users WHERE school = %s", (school,))
                 user_hashes = result1.fetchall()
                 for user_hash in user_hashes:
                     log.debug('user Hash: %s', user_hash[0])
@@ -297,9 +287,9 @@ class DB_Stats:
                     params_uptime = (activity, ts_start, ts_end, 'uptime', user_hash[0])
 
                     result2 = cursor2.execute(select_usage, params_focus)
-                    focus = float (result2.fetchone()[0]) + focus
+                    focus = float(result2.fetchone()[0]) + focus
                     result2 = cursor2.execute(select_usage, params_uptime)
-                    uptime = float (result2.fetchone()[0]) + uptime
+                    uptime = float(result2.fetchone()[0]) + uptime
 
             else:
                 select_usage = "SELECT SUM(data) FROM Usages WHERE (resource_name = %s)  AND (start_date > %s) AND (start_date < %s) AND (data_type = %s)"
@@ -312,20 +302,20 @@ class DB_Stats:
 
             log.debug('Times of (%s) from: %s -> %s: Uptime: %s, Focus: %s', activity, start, end, uptime, focus)
 
-
             # cursor1.close()  # Not need
             # cursor2.close()  # Not need
             return (uptime, focus)
+
         except sa.exc.DBAPIError as err:
             log.error('MySQL on rep_activity_time %s', err)
+
         except Exception as e:
             log.error('MySQL on rep_activity_time : %s', e)
+
         return (None, None)
 
-
-
-    def rep_get_activities (self, start, end, school=None, desktop='any'):
-        res_list = list();
+    def rep_get_activities(self, start, end, school=None, desktop='any'):
+        res_list = list()
         cursor1 = self.cnx.cursor()
         cursor2 = self.cnx.cursor()
         cursor3 = self.cnx.cursor()
@@ -343,7 +333,7 @@ class DB_Stats:
             if school != None:
                 log.debug('Most activiy used by school: %s', school)
                 """ Get user hash from a School"""
-                result1 = cursor1.execute ("SELECT hash FROM Users WHERE school = %s", (school,))
+                result1 = cursor1.execute("SELECT hash FROM Users WHERE school = %s", (school,))
                 user_hashes = result1.fetchall()
                 """ Cursor for select resources from Uages table"""
                 select_usage = "SELECT SUM(data) FROM Usages WHERE (resource_name = %s) AND (start_date > %s) AND (start_date < %s) AND (data_type = 'active') AND (user_hash = %s)"
@@ -352,29 +342,27 @@ class DB_Stats:
                 """ Cursor for select resources from Uages table"""
                 select_usage = "SELECT SUM(data) FROM Usages WHERE (resource_name = %s) AND (start_date > %s) AND (start_date < %s) AND (data_type = 'active')"
 
-
-
             ts_start = self.date_to_ts(start)
-            ts_end   = self.date_to_ts(end)
-
+            ts_end = self.date_to_ts(end)
 
             for resource in resources:
                 log.debug('Resource: %s', resource[0])
-                if self.is_an_activity (resource[0]):
+                if self.is_an_activity(resource[0]):
                     if school != None:
                         for user_hash in user_hashes:
                             log.debug('user Hash: %s', user_hash[0])
                             result3 = cursor3.execute(select_usage, (resource[0], ts_start, ts_end, user_hash[0]))
                             focus = result3.fetchone()[0]
-                            if focus == None: focus = 0
-
+                            if focus == None:
+                                focus = 0
                             log.debug('Focus time: %s', focus)
                             res_list.append((resource[0], focus))
                     else:
                         result3 = cursor3.execute(select_usage, (resource[0], ts_start, ts_end))
                         focus = result3.fetchone()[0]
-                        if focus == None: focus = 0
-                        log.debug('Focus time: %s', focus )
+                        if focus == None:
+                            focus = 0
+                        log.debug('Focus time: %s', focus)
                         res_list.append((resource[0], focus))
 
         except sa.exc.DBAPIError as err:
@@ -384,52 +372,48 @@ class DB_Stats:
         # cursor1.close()  # Not need
         # cursor2.close()  # Not need
         # cursor3.close()  # Not need
-        log.debug ('Activities: %s', sorted(res_list, key=lambda x: x[1], reverse=True))
+        log.debug('Activities: %s', sorted(res_list, key=lambda x: x[1], reverse=True))
         return sorted(res_list, key=lambda x: x[1], reverse=True)
 
-
-
-    def rep_frequency_usage (self, start, end, school=None):
+    def rep_frequency_usage(self, start, end, school=None):
         cursor1 = self.cnx.cursor()
         cursor2 = self.cnx.cursor()
-        user_hashes=()
+        user_hashes = ()
         time = 0
         try:
             ts_start = self.date_to_ts(start)
-            ts_end   = self.date_to_ts(end)
+            ts_end = self.date_to_ts(end)
 
             if school != None:
                 log.debug('Frequency usage by school: %s', school)
                 """ Get user hash from a School"""
-                result1 = cursor1.execute ("SELECT hash FROM Users WHERE school = %s", (school,))
+                result1 = cursor1.execute("SELECT hash FROM Users WHERE school = %s", (school,))
                 user_hashes = result1.fetchall()
 
                 for user_hash in user_hashes:
                     result2 = cursor2.execute("SELECT SUM(data) FROM Usages WHERE (resource_name = 'system') AND (start_date > %s) AND (start_date < %s) AND (data_type = 'uptime') AND (user_hash = %s)", (ts_start, ts_end, user_hash[0]))
                     res = result2.fetchone()
                     if res != None and res[0] != None:
-                        time = float (res[0]) + time
+                        time = float(res[0]) + time
             else:
                 log.debug('Frequency usage')
-                result1 = cursor1.execute ("SELECT hash FROM Users")
+                result1 = cursor1.execute("SELECT hash FROM Users")
                 user_hashes = result1.fetchall()
                 result2 = cursor2.execute("SELECT SUM(data) FROM Usages WHERE (resource_name = 'system') AND (start_date > %s) AND (start_date < %s) AND (data_type = 'uptime')", (ts_start, ts_end))
                 time = result2.fetchone()[0]
 
             return (time, len(user_hashes))
 
-
         except sa.exc.DBAPIError as err:
             log.error("MySQL on %s: %s", 'cursor.statement', err)
         # cursor1.close()  # Not need
         # cursor2.close()  # Not need
 
-
     def rep_update_school(self, machine_sn, school):
         cursor = self.cnx.cursor()
         try:
             log.debug("Set school name: %s to user with machine_sn: %s", school, machine_sn)
-            cursor.execute ("UPDATE Users SET school = %s WHERE machine_sn = %s", (school, machine_sn))
+            cursor.execute("UPDATE Users SET school = %s WHERE machine_sn = %s", (school, machine_sn))
         except sa.exc.DBAPIError as err:
             log.error("MySQL on %s: %s", 'cursor.statement', err)
         else:
@@ -448,6 +432,3 @@ class DB_Stats:
 
     def date_to_ts(self, date):
         return datetime.strptime(date, "%Y-%m-%d")
-
-
-
