@@ -5,6 +5,7 @@ import mysql.connector
 from mysql.connector import errorcode
 
 import sqlalchemy as sa
+from sqlalchemy.sql import func
 
 log = logging.getLogger("stats-consolidation")
 
@@ -66,6 +67,77 @@ class DB_Stats:
         self.db_name  = db_name
         self.user = user
         self.password = password
+
+    def _metadata(self):
+        metadata = sa.MetaData()
+
+        # TABLES['Usages'] = (
+        # "CREATE TABLE `Usages` ("
+        # "   `ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,"
+        # "   `user_hash` CHAR(40) NOT NULL,"
+        # "   `resource_name` CHAR(80),"
+        # "   `start_date` TIMESTAMP NOT NULL,"
+        # "   `data_type` CHAR (30) NOT NULL,"
+        # "   `data` INTEGER NOT NULL,"
+        # "   PRIMARY KEY (`user_hash`,`start_date`,`resource_name`, `data_type`)"
+        # "   )"
+        Usages = sa.Table('Usages', metadata,
+            sa.Column('ts', sa.TIMESTAMP,
+                server_default=func.current_timestamp(),
+                server_onupdate=func.current_timestamp()),
+            sa.Column('user_hash', sa.CHAR(40), nullable=False, primary_key=True),
+            sa.Column('resource_name', sa.CHAR(80), primary_key=True),
+            sa.Column('start_date', sa.TIMESTAMP, nullable=False, primary_key=True),
+            sa.Column('data_type', sa.CHAR(30), nullable=False, primary_key=True),
+            sa.Column('data', sa.INTEGER, nullable=False),
+        )
+
+        # TABLES['Resources'] = (
+        # "CREATE TABLE Resources ("
+        # "   `name` CHAR(250),"
+        # "   PRIMARY KEY (name)"
+        # "   )"
+        Resources = sa.Table('Resources', metadata,
+            sa.Column('name', sa.CHAR(250), primary_key=True),
+        )
+
+        # TABLES['Users'] = (
+        # "CREATE TABLE Users("
+        # "       `hash` CHAR (40) NOT NULL,"
+        # "       `uuid` CHAR (32) NOT NULL,"
+        # "   `machine_sn` CHAR(80),"
+        # "   `age` INTEGER NOT NULL,"
+        # "   `school` CHAR(80),"
+        # "   `sw_version` CHAR (80),"
+        # "   `ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,"
+        # "   PRIMARY KEY (hash)"
+        # "   )"
+        Users = sa.Table('Users', metadata,
+            sa.Column('hash', sa.CHAR(40), nullable=False, primary_key=True),
+            sa.Column('uuid', sa.CHAR(32), nullable=False),
+            sa.Column('machine_sn', sa.CHAR(80)),
+            sa.Column('age', sa.INTEGER, nullable=False),
+            sa.Column('school', sa.CHAR(80)),
+            sa.Column('sw_version', sa.CHAR(80)),
+            sa.Column('ts', sa.TIMESTAMP,
+                server_default=func.current_timestamp(),
+                server_onupdate=func.current_timestamp()),
+        )
+
+        # TABLES['Runs'] = (
+        # "CREATE TABLE Runs("
+        # "   `last_ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP "
+        # ")"
+        Runs = sa.Table('Runs', metadata,
+            sa.Column('ts', sa.TIMESTAMP,
+                server_default=func.current_timestamp(),
+                server_onupdate=func.current_timestamp()),
+        )
+        return metadata
+
+    def _create_tables(self, engine):
+        metadata = self._metadata()
+        metadata.create_all(self._get_engine())
 
     def create_tables(self, cursor):
         for name, ddl in self.TABLES.iteritems():
