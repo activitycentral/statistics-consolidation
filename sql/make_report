@@ -16,15 +16,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
-
 import sys
 import logging
+
+from datetime import datetime
 
 # FIXME: Use relative import or change path
 import os
 basedir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(basedir)
-from stats_consolidation.db import *
+from stats_consolidation.db import DB_Stats
 
 
 parser = argparse.ArgumentParser()
