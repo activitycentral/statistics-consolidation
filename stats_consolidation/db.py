@@ -26,43 +26,6 @@ class Connection(object):
 
 
 class DB_Stats:
-    TABLES={}
-
-    TABLES['Usages'] = (
-        "CREATE TABLE `Usages` ("
-        "   `ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,"
-        "   `user_hash` CHAR(40) NOT NULL,"
-        "   `resource_name` CHAR(80),"
-        "   `start_date` TIMESTAMP NOT NULL,"
-        "   `data_type` CHAR (30) NOT NULL,"
-        "   `data` INTEGER NOT NULL,"
-        "   PRIMARY KEY (`user_hash`,`start_date`,`resource_name`, `data_type`)"
-        "   )")
-
-    TABLES['Resources'] = (
-        "CREATE TABLE Resources ("
-        "   `name` CHAR(250),"
-        "   PRIMARY KEY (name)"
-        "   )")
-
-    TABLES['Users'] = (
-        "CREATE TABLE Users("
-        "       `hash` CHAR (40) NOT NULL,"
-        "       `uuid` CHAR (32) NOT NULL,"
-        "   `machine_sn` CHAR(80),"
-        "   `age` INTEGER NOT NULL,"
-        "   `school` CHAR(80),"
-        "   `sw_version` CHAR (80),"
-        "   `ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,"
-        "   PRIMARY KEY (hash)"
-        "   )")
-
-    TABLES['Runs'] = (
-        "CREATE TABLE Runs("
-        "   `last_ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP "
-        ")")
-
-
     def __init__(self,  db_name, user, password):
         self.db_name  = db_name
         self.user = user
@@ -135,29 +98,15 @@ class DB_Stats:
         )
         return metadata
 
-    def _create_tables(self, engine):
+    def _create_tables(self):
         metadata = self._metadata()
         metadata.create_all(self._get_engine())
 
-    def create_tables(self, cursor):
-        for name, ddl in self.TABLES.iteritems():
-            try:
-                log.info('Creating table %s:', name)
-                cursor.execute(ddl)
-            except sa.exc.DBAPIError as err:
-                raise err
-            else:
-                log.info('Table %s created', name)
-
-    def create (self):
+    def create(self):
+        self._create_tables()
         self.connect()
-        cursor = self.cnx.cursor()
-        try:
-            self.create_tables(cursor)
-        except sa.exc.DBAPIError as err:
-            raise Exception ("Error: {0}".format(err))
 
-    def close (self):
+    def close(self):
         self.cnx.close()
 
     def _get_engine(self):
