@@ -266,6 +266,7 @@ class DB_Stats:
         except mysql.connector.Error as err:
             log.error('MySQL on get_date_last_record: %s %s','cursor.statement', err)
         except Exception as e:
+            log.error(e)
             raise Exception ("get_date_last_record: {0}".format(e))
         # cursor.close()  # Not need
 
