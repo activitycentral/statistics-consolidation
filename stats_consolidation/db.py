@@ -72,7 +72,7 @@ class DB_Stats:
         try:
             cursor.execute(
             "CREATE DATABASE {0} DEFAULT CHARACTER SET 'utf8'".format(self.db_name))
-        except mysql.connector.Error as err:
+        except sa.exc.DBAPIError as err:
             raise Exception ("Failed creating database: {0}".format(err))
 
     def create_tables(self, cursor):
@@ -80,7 +80,7 @@ class DB_Stats:
             try:
                 log.info('Creating table %s:', name)
                 cursor.execute(ddl)
-            except mysql.connector.Error as err:
+            except sa.exc.DBAPIError as err:
                 if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
                     log.warning('Table %s already exists.', name)
                 else:
@@ -96,7 +96,7 @@ class DB_Stats:
             self.cnx.database = self.db_name
             log.info('Data Base %s already created, will create tables',  self.db_name)
             self.create_tables(cursor)
-        except mysql.connector.Error as err:
+        except sa.exc.DBAPIError as err:
             raise Exception ("Error: {0}".format(err))
         cursor.close()
         # IMPORTANT: Reconnect this time using SQLAlchemy
@@ -124,7 +124,7 @@ class DB_Stats:
             cursor = self.cnx.cursor()
             self.cnx.database = self.db_name
             cursor.close()
-        except mysql.connector.Error as err:
+        except sa.exc.DBAPIError as err:
             raise Exception ("Error: {0}".format(err))
 
 
@@ -182,7 +182,7 @@ class DB_Stats:
 
                 self.cnx.commit()
 
-            except mysql.connector.Error as err:
+            except sa.exc.DBAPIError as err:
                             log.error('MySQL on store_activiy_time()%s: %s %s', data_type, 'cursor.statement', err)
         # cursor.close()  # Not need
 
@@ -202,7 +202,7 @@ class DB_Stats:
                 cursor.execute(insert, info)
                 self.cnx.commit()
                 log.info('New Resource %s stored in DB', resource_name)
-        except mysql.connector.Error as err:
+        except sa.exc.DBAPIError as err:
             log.error('MySQL on store_resource:  %s %s', 'cursor.statement', err)
 
         # cursor.close()  # Not need
@@ -222,7 +222,7 @@ class DB_Stats:
                 cursor.execute(insert, params)
                 self.cnx.commit()
                 log.debug('New User %s stored in DB', rrd.user_hash)
-        except mysql.connector.Error as err:
+        except sa.exc.DBAPIError as err:
             log.error('MySQL on store_user %s %s', 'cursor.statement', err)
 
         # cursor.close()  # Not need
@@ -246,7 +246,7 @@ class DB_Stats:
                 cursor.execute(op)
                 self.cnx.commit()
             log.info("Save last record");
-        except mysql.connector.Error as err:
+        except sa.exc.DBAPIError as err:
             log.error('MySQL on update_last_record: %s %s', 'cursor.statement', err)
             res = -1
 
@@ -265,7 +265,7 @@ class DB_Stats:
             else:
                 log.info('Last date record is None')
                 return 0
-        except mysql.connector.Error as err:
+        except sa.exc.DBAPIError as err:
             log.error('MySQL on get_date_last_record: %s %s','cursor.statement', err)
         except Exception as e:
             log.error(e)
@@ -322,7 +322,7 @@ class DB_Stats:
             # cursor1.close()  # Not need
             # cursor2.close()  # Not need
             return (uptime, focus)
-        except mysql.connector.Error as err:
+        except sa.exc.DBAPIError as err:
             log.error('MySQL on rep_activity_time %s', err)
         except Exception as e:
             log.error('MySQL on rep_activity_time : %s', e)
@@ -383,7 +383,7 @@ class DB_Stats:
                         log.debug('Focus time: %s', focus )
                         res_list.append((resource[0], focus))
 
-        except  mysql.connector.Error as err:
+        except sa.exc.DBAPIError as err:
             log.error('MySQL on most_activity_used %s', err)
         except Exception as e:
             log.error('most_activity_used  Fail: %s', e)
@@ -425,7 +425,7 @@ class DB_Stats:
             return (time, len(user_hashes))
 
 
-        except mysql.connector.Error as err:
+        except sa.exc.DBAPIError as err:
             log.error("MySQL on %s: %s", 'cursor.statement', err)
         # cursor1.close()  # Not need
         # cursor2.close()  # Not need
@@ -436,7 +436,7 @@ class DB_Stats:
         try:
             log.debug("Set school name: %s to user with machine_sn: %s", school, machine_sn)
             cursor.execute ("UPDATE Users SET school = %s WHERE machine_sn = %s", (school, machine_sn))
-        except mysql.connector.Error as err:
+        except sa.exc.DBAPIError as err:
             log.error("MySQL on %s: %s", 'cursor.statement', err)
         else:
             self.cnx.commit()
