@@ -99,6 +99,8 @@ class DB_Stats:
         except mysql.connector.Error as err:
             raise Exception ("Error: {0}".format(err))
         cursor.close()
+        # IMPORTANT: Reconnect this time using SQLAlchemy
+        self.connect()
 
 
 
@@ -166,8 +168,8 @@ class DB_Stats:
             info_sel = (rrd.get_user_hash(), rrd.get_name() , datetime.fromtimestamp(float(d[0])), data_type)
             try:
                 """Verify if this activity has an entry already at the same start_date"""
-                cursor.execute (select, info_sel)
-                result = cursor.fetchone()
+                result_proxy = cursor.execute (select, info_sel)
+                result = result_proxy.fetchone()
 
                 if result != None:
                     log.info('Update %s \'%s\' entry for resource \'%s\' ', data_type, d[1], rrd.get_name())
@@ -190,8 +192,8 @@ class DB_Stats:
         op = ("SELECT name FROM Resources WHERE name = %s")
         params = (resource_name,)
         try:
-            cursor.execute(op, params)
-            result = cursor.fetchone()
+            result_proxy = cursor.execute(op, params)
+            result = result_proxy.fetchone()
             if result != None:
                 log.debug('Resource %s already present in DB', resource_name)
             else:
@@ -210,8 +212,8 @@ class DB_Stats:
         op = ("SELECT hash FROM Users WHERE hash = %s")
         params = (rrd.get_user_hash(), )
         try:
-            cursor.execute(op, params)
-            result = cursor.fetchone()
+            result_proxy = cursor.execute(op, params)
+            result = result_proxy.fetchone()
             if result != None:
                 log.debug('User %s already in DB', rrd.user_hash)
             else:
@@ -232,8 +234,8 @@ class DB_Stats:
         res = 0
         op = ("SELECT * FROM Runs")
         try:
-            cursor.execute(op)
-            result = cursor.fetchone()
+            result_proxy = cursor.execute(op)
+            result = result_proxy.fetchone()
 
             if result != None:
                 op = ("UPDATE Runs SET last_ts = CURRENT_TIMESTAMP")
@@ -255,8 +257,8 @@ class DB_Stats:
         cursor = self.cnx.cursor()
         op = ("SELECT UNIX_TIMESTAMP ((SELECT last_ts FROM Runs))")
         try:
-            cursor.execute(op)
-            result = cursor.fetchone()
+            result_proxy = cursor.execute(op)
+            result = result_proxy.fetchone()
             if result != None and result[0] != None:
                 log.info('Last record: %s', str(datetime.fromtimestamp (float (result[0]))))
                 return result[0]
