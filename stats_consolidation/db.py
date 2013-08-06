@@ -99,15 +99,6 @@ class DB_Stats:
         return self.cnx
 
 
-        try:
-            self.cnx = mysql.connector.connect(user=self.user, password=self.password)
-            cursor = self.cnx.cursor()
-            self.cnx.database = self.db_name
-            cursor.close()
-        except sa.exc.DBAPIError as err:
-            raise Exception ("Error: {0}".format(err))
-
-
 #=========================================================================================================
 #               Q U E R I E S   S A V E   M E T H O D S
 #=========================================================================================================
