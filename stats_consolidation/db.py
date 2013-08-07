@@ -174,7 +174,7 @@ class DB_Stats:
                 self.cnx.commit()
 
             except sa.exc.DBAPIError as err:
-                            log.error('MySQL on store_activiy_time()%s: %s %s', data_type, 'cursor.statement', err)
+                log.error('MySQL on store_activiy_time()%s: %s %s', data_type, 'cursor.statement', err)
         # cursor.close()  # Not need
 
     def store_resource(self, resource_name):
