@@ -174,7 +174,6 @@ class DB_Stats:
 
             except sa.exc.DBAPIError as err:
                 log.error('MySQL on store_activiy_time()%s: %s %s', data_type, 'cursor.statement', err)
-        # cursor.close()  # Not need
 
     def store_resource(self, resource_name):
         cursor = self.cnx.cursor()
@@ -194,8 +193,6 @@ class DB_Stats:
         except sa.exc.DBAPIError as err:
             log.error('MySQL on store_resource:  %s %s', 'cursor.statement', err)
 
-        # cursor.close()  # Not need
-
     def store_user(self, rrd):
         cursor = self.cnx.cursor()
         op = ("SELECT hash FROM Users WHERE hash = %s")
@@ -213,8 +210,6 @@ class DB_Stats:
                 log.debug('New User %s stored in DB', rrd.user_hash)
         except sa.exc.DBAPIError as err:
             log.error('MySQL on store_user %s %s', 'cursor.statement', err)
-
-        # cursor.close()  # Not need
 
     def update_last_record(self):
         cursor = self.cnx.cursor()
@@ -237,7 +232,6 @@ class DB_Stats:
             log.error('MySQL on update_last_record: %s %s', 'cursor.statement', err)
             res = -1
 
-        # cursor.close()  # Not need
         return res
 
     def get_date_last_record(self):
@@ -257,7 +251,6 @@ class DB_Stats:
         except Exception as e:
             log.error(e)
             raise Exception("get_date_last_record: {0}".format(e))
-        # cursor.close()  # Not need
 
 #=========================================================================================================
 #               R E P O R T   M E T H O D S
@@ -301,8 +294,6 @@ class DB_Stats:
 
             log.debug('Times of (%s) from: %s -> %s: Uptime: %s, Focus: %s', activity, start, end, uptime, focus)
 
-            # cursor1.close()  # Not need
-            # cursor2.close()  # Not need
             return (uptime, focus)
 
         except sa.exc.DBAPIError as err:
@@ -368,9 +359,6 @@ class DB_Stats:
             log.error('MySQL on most_activity_used %s', err)
         except Exception as e:
             log.error('most_activity_used  Fail: %s', e)
-        # cursor1.close()  # Not need
-        # cursor2.close()  # Not need
-        # cursor3.close()  # Not need
         log.debug('Activities: %s', sorted(res_list, key=lambda x: x[1], reverse=True))
         return sorted(res_list, key=lambda x: x[1], reverse=True)
 
@@ -405,8 +393,6 @@ class DB_Stats:
 
         except sa.exc.DBAPIError as err:
             log.error("MySQL on %s: %s", 'cursor.statement', err)
-        # cursor1.close()  # Not need
-        # cursor2.close()  # Not need
 
     def rep_update_school(self, machine_sn, school):
         cursor = self.cnx.cursor()
@@ -417,8 +403,6 @@ class DB_Stats:
             log.error("MySQL on %s: %s", 'cursor.statement', err)
         else:
             self.cnx.commit()
-
-        # cursor.close()  # Not need
 
 #=========================================================================================================
 #                    A U X I L I A R   M E T H O D S
