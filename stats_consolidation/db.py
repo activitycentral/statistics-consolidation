@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+import time
 
 import sqlalchemy as sa
 from sqlalchemy.sql import func
@@ -236,13 +237,14 @@ class DB_Stats:
 
     def get_date_last_record(self):
         cursor = self.cnx.cursor()
-        op = ("SELECT UNIX_TIMESTAMP ((SELECT last_ts FROM Runs))")
+        op = "SELECT last_ts FROM runs"
         try:
             result_proxy = cursor.execute(op)
             result = result_proxy.fetchone()
             if result != None and result[0] != None:
-                log.info('Last record: %s', str(datetime.fromtimestamp(float(result[0]))))
-                return result[0]
+                dt = result[0]
+                log.info('Last record: %s', str(dt))
+                return time.mktime(dt.timetuple())
             else:
                 log.info('Last date record is None')
                 return 0
