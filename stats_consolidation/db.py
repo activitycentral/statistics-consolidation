@@ -256,8 +256,6 @@ class DB_Stats:
 #               R E P O R T   M E T H O D S
 #=========================================================================================================
     def rep_activity_time(self, start, end, activity, school=None):
-        uptime_last = 0
-        activity_name = ''
         focus = 0
         uptime = 0
         ts_start = self.date_to_ts(start)
