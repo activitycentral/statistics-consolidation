@@ -15,13 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import argparse 
+import argparse
 import ConfigParser
 import logging
 import logging.handlers
 import sys, os
 
-# FIXME: Use relative import or change path 
+# FIXME: Use relative import or change path
 basedir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(basedir)
 
@@ -29,8 +29,8 @@ from stats_consolidation.db import *
 from stats_consolidation.rrd_files import *
 from stats_consolidation.consolidation import *
 
-	
-parser = argparse.ArgumentParser()	
+
+parser = argparse.ArgumentParser()
 parser.add_argument('--config_file', required=False)
 
 args = parser.parse_args()
@@ -49,33 +49,33 @@ def main():
 
 	config = ConfigParser.ConfigParser()
 	if (args.config_file == None):
-		config_file = "/etc/stats-consolidation.conf"	
+		config_file = "/etc/stats-consolidation.conf"
 	else:
 		config_file = args.config_file
 
 	config.read(config_file)
 
-	log_path = config.get('main', 'log_path') 
-	log_level = config.get('main', 'log_level')  
+	log_path = config.get('main', 'log_path')
+	log_level = config.get('main', 'log_level')
 	db_name = config.get('main', 'db_name')
-	db_user = config.get('main', 'db_user') 
+	db_user = config.get('main', 'db_user')
 	db_pass = config.get('main', 'db_pass')
 	rrd_path = config.get('main', 'rrd_path')
-	
+
 	LOG_FILENAME = os.path.join(log_path,'stats-consolidation.log')
 	# Add the log message handler to the logger
 	handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=10000000, backupCount=5)
 	handler.setFormatter(logging.Formatter(fmt=_LOG_FORMAT))
 	handler.setLevel(_LOG_LEVEL[log_level])
-	
+
 	log = logging.getLogger("stats-consolidation")
 	log.setLevel(_LOG_LEVEL[log_level])
 	log.addHandler(handler)
-	
+
 	log.info('**************************************')
 	log.info('       Starting consolidation         ')
 	log.info('**************************************')
-	
+
 	try:
 		db = DB_Stats (db_name, db_user, db_pass)
 		db.create()
@@ -87,7 +87,7 @@ def main():
 		con = Consolidation(rrd_path, db)
 		con.process_rrds()
 		db.close()
-	
+
 		log.info('**************************************')
 		log.info('       Finish consolidation           ')
 		log.info('**************************************')
