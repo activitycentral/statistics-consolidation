@@ -30,23 +30,25 @@ clean:
 
 COVERAGE=python ../.venv/bin/coverage run --source=../stats_consolidation,../sql
 
+DBOPTIONS=--db_name sc --db_user sc --db_pass sc
+
 .coverage: dropdb createdb
 	$(COVERAGE)\
 		../stats_consolidation/stats_consolidation_run --config_file test.conf
 	$(COVERAGE)\
 		../stats_consolidation/stats_consolidation_run --config_file test.conf
 	$(COVERAGE) -a\
-		../sql/make_report --query all --db_name sc --db_user sc --db_pass sc --start_date 2013-01-01 --end_date 2013-12-12
+		../sql/make_report --query all $(DBOPTIONS) --start_date 2013-01-01 --end_date 2013-12-12
 	$(COVERAGE) -a\
-		../sql/make_report --query update_school --db_name sc --db_user sc --db_pass sc --school "TEST" --machine_sn "anonymous"
+		../sql/make_report --query update_school $(DBOPTIONS) --school "TEST" --machine_sn "anonymous"
 	$(COVERAGE) -a\
-		../sql/make_report --query desktops --db_name sc --db_user sc --db_pass sc --start_date 2013-01-01 --end_date 2013-12-12
+		../sql/make_report --query desktops $(DBOPTIONS) --start_date 2013-01-01 --end_date 2013-12-12
 	$(COVERAGE) -a\
-		../sql/make_report --query desktops --db_name sc --db_user sc --db_pass sc --start_date 2013-01-01 --end_date 2013-12-12 --school TEST
+		../sql/make_report --query desktops $(DBOPTIONS) --start_date 2013-01-01 --end_date 2013-12-12 --school TEST
 	$(COVERAGE) -a\
-		../sql/make_report --query desktops --db_name sc --db_user sc --db_pass sc --start_date 2013-01-01 --end_date 2013-12-12 --desktop gnome
+		../sql/make_report --query desktops $(DBOPTIONS) --start_date 2013-01-01 --end_date 2013-12-12 --desktop gnome
 	$(COVERAGE) -a\
-		../sql/make_report --query activity_time --db_name sc --db_user sc --db_pass sc --start_date 2013-01-01 --end_date 2013-12-12 --activity journal --school TEST
+		../sql/make_report --query activity_time $(DBOPTIONS) --start_date 2013-01-01 --end_date 2013-12-12 --activity journal --school TEST
 
 coverage: .coverage
 	coverage html
