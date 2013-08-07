@@ -42,9 +42,11 @@ COVERAGE=python ../.venv/bin/coverage run --source=../stats_consolidation,../sql
 	$(COVERAGE) -a\
 		../sql/make_report --query desktops --db_name sc --db_user sc --db_pass sc --start_date 2013-01-01 --end_date 2013-12-12
 	$(COVERAGE) -a\
-		../sql/make_report --query desktops --db_name sc --db_user sc --db_pass sc --start_date 2013-01-01 --end_date 2013-12-12 --school acme
+		../sql/make_report --query desktops --db_name sc --db_user sc --db_pass sc --start_date 2013-01-01 --end_date 2013-12-12 --school TEST
 	$(COVERAGE) -a\
 		../sql/make_report --query desktops --db_name sc --db_user sc --db_pass sc --start_date 2013-01-01 --end_date 2013-12-12 --desktop gnome
+	$(COVERAGE) -a\
+		../sql/make_report --query activity_time --db_name sc --db_user sc --db_pass sc --start_date 2013-01-01 --end_date 2013-12-12 --activity journal --school TEST
 
 coverage: .coverage
 	coverage html
