@@ -24,11 +24,12 @@ class Connection(object):
 
 
 class DB_Stats:
-    def __init__(self,  db_name, user, password):
+    def __init__(self,  db_name, user, password, dialect=None):
         self.db_name = db_name
         self.user = user
         self.password = password
         self.cnx = None
+        self.dialect = dialect or 'mysql+mysqlconnector'
 
     def _metadata(self):
         metadata = sa.MetaData()
@@ -109,8 +110,9 @@ class DB_Stats:
         self.cnx.close()
 
     def _get_engine(self):
-        database_url = 'mysql+mysqlconnector://{user}:{password}@localhost/{db_name}'
+        database_url = '{dialect}://{user}:{password}@localhost/{db_name}'
         engine = sa.create_engine(database_url.format(
+            dialect=self.dialect,
             user=self.user,
             password=self.password,
             db_name=self.db_name)
