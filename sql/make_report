@@ -29,12 +29,15 @@ from stats_consolidation.db import DB_Stats
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--query', required=True)
-parser.add_argument('--start_date', required=False)
-parser.add_argument('--end_date', required=False)
+# Database arguments
 parser.add_argument('--db_name', required=True)
 parser.add_argument('--db_user', required=True)
 parser.add_argument('--db_pass', required=True)
+parser.add_argument('--db_dialect', required=False)
+# Report arguments
+parser.add_argument('--query', required=True)
+parser.add_argument('--start_date', required=False)
+parser.add_argument('--end_date', required=False)
 parser.add_argument('--activity', required=False)
 parser.add_argument('--school', required=False)
 parser.add_argument('--log_level', required=False)
@@ -175,7 +178,7 @@ def update_school(re, machine_sn, school):
 
 
 def main():
-    re = DB_Stats(args.db_name, args.db_user, args.db_pass)
+    re = DB_Stats(args.db_name, args.db_user, args.db_pass, args.db_dialect)
     re.connect()
 
     if args.query == 'activity_time':
