@@ -27,6 +27,7 @@ class DB_Stats:
         self.db_name = db_name
         self.user = user
         self.password = password
+        self.cnx = None
 
     def _metadata(self):
         metadata = sa.MetaData()
@@ -116,7 +117,8 @@ class DB_Stats:
         return engine
 
     def connect(self):
-        self.cnx = Connection(self._get_engine())
+        if self.cnx is None:
+            self.cnx = Connection(self._get_engine())
         return self.cnx
 
 #=========================================================================================================
