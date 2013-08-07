@@ -91,7 +91,7 @@ class DB_Stats:
         # "   `last_ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP "
         # ")"
         Runs = sa.Table('Runs', metadata,
-            sa.Column('ts', sa.TIMESTAMP,
+            sa.Column('last_ts', sa.TIMESTAMP,
                 server_default=func.current_timestamp(),
                 server_onupdate=func.current_timestamp()),
         )
