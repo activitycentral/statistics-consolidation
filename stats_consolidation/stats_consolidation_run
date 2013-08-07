@@ -64,6 +64,11 @@ def main():
     db_pass = config.get('main', 'db_pass')
     rrd_path = config.get('main', 'rrd_path')
 
+    try:
+        dialect = config.get('main', 'db_dialect')
+    except ConfigParser.NoOptionError:
+        dialect = None
+
     LOG_FILENAME = os.path.join(log_path, 'stats-consolidation.log')
     # Add the log message handler to the logger
     handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=10000000, backupCount=5)
@@ -79,7 +84,7 @@ def main():
     log.info('**************************************')
 
     try:
-        db = DB_Stats(db_name, db_user, db_pass)
+        db = DB_Stats(db_name, db_user, db_pass, dialect)
         db.create()
     except Exception as e:
         log.warning('Creating DB: %s', str(e))
