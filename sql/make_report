@@ -29,25 +29,25 @@ from stats_consolidation.db import DB_Stats
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--query',required=True)
-parser.add_argument('--start_date',required=False)
-parser.add_argument('--end_date',required=False)
-parser.add_argument('--db_name',required=True)
-parser.add_argument('--db_user',required=True)
-parser.add_argument('--db_pass',required=True)
-parser.add_argument('--activity',required=False)
-parser.add_argument('--school',required=False)
-parser.add_argument('--log_level',required=False)
-parser.add_argument('--machine_sn',required=False)
-parser.add_argument('--cant_max',required=False)
-parser.add_argument('--desktop',required=False)
+parser.add_argument('--query', required=True)
+parser.add_argument('--start_date', required=False)
+parser.add_argument('--end_date', required=False)
+parser.add_argument('--db_name', required=True)
+parser.add_argument('--db_user', required=True)
+parser.add_argument('--db_pass', required=True)
+parser.add_argument('--activity', required=False)
+parser.add_argument('--school', required=False)
+parser.add_argument('--log_level', required=False)
+parser.add_argument('--machine_sn', required=False)
+parser.add_argument('--cant_max', required=False)
+parser.add_argument('--desktop', required=False)
 
 args = parser.parse_args()
 
 """
-_LOG_FORMAT='[%(asctime)s]-%(levelname)s-\'%(name)s\': %(message)s'
+_LOG_FORMAT = '[%(asctime)s]-%(levelname)s-\'%(name)s\': %(message)s'
 """
-_LOG_FORMAT='%(message)s'
+_LOG_FORMAT = '%(message)s'
 
 if args.log_level == 'debug':
     log_level = logging.DEBUG
@@ -67,7 +67,7 @@ logging.getLogger('sugar_stats_consolidation.rrd_files').addHandler(ch)
 logging.getLogger('sugar_stats_consolidation.rrd_files').setLevel(log_level)
 
 
-def desktops (re, start, end, school=None, desktop='any'):
+def desktops(re, start, end, school=None, desktop='any'):
     activity = re.rep_get_activities(start, end, school, desktop)
 
     log.info("\n\n")
@@ -80,18 +80,15 @@ def desktops (re, start, end, school=None, desktop='any'):
         log.info("")
         i = 0
         total = 0
-        while i < len (activity):
+        while i < len(activity):
             total = activity[i][1] + total
-            i=i+1
-
+            i = i + 1
 
         log.info('TOTAL: %.1f hrs / %.2f mins / %.2f secs', (total/60/60), (total/60), total)
     else:
         log.info("No activity found for desktop %s!!", desktop)
     log.info("***************************************************************************************************************")
     log.info("\n\n")
-
-
 
 
 def activity_most_used(re, start, end, school=None, cant_max=None, desktop='any'):
@@ -109,24 +106,25 @@ def activity_most_used(re, start, end, school=None, cant_max=None, desktop='any'
     elif (cant_max != None) and (len(activity) > 0):
         log.info("")
         i = 0
-        while (i < len (activity)) and (i < int(cant_max)):
+        while (i < len(activity)) and (i < int(cant_max)):
             log.info('%s) %s: %.1f hrs / %.2f mins / %.2f secs',
                                     i+1,
                                     activity[i][0],
                                     (activity[i][1]/60/60),
                                     (activity[i][1]/60),
                                     activity[i][1])
-            i=i+1
+            i = i+1
     else:
         log.info("No activity found !!")
     log.info("***************************************************************************************************************")
     log.info("\n\n")
 
-def frequency_usage(re, start, end, school=None):
-    (fres, xos) = re.rep_frequency_usage(start, end, school);
 
-    ts_end   = long (datetime.strptime(end, "%Y-%m-%d").strftime("%s"))
-    ts_start = long (datetime.strptime(start, "%Y-%m-%d").strftime("%s"))
+def frequency_usage(re, start, end, school=None):
+    (fres, xos) = re.rep_frequency_usage(start, end, school)
+
+    ts_end = long(datetime.strptime(end, "%Y-%m-%d").strftime("%s"))
+    ts_start = long(datetime.strptime(start, "%Y-%m-%d").strftime("%s"))
 
     f_total = (fres / 60)
     if xos != 0:
@@ -147,12 +145,12 @@ def frequency_usage(re, start, end, school=None):
     log.info("**************************************************************************************************************")
     log.info("\n\n")
 
-def activity_time (re, start, end, activity, school=None):
-    time = re.rep_activity_time (start, end, activity, school);
 
+def activity_time(re, start, end, activity, school=None):
+    time = re.rep_activity_time(start, end, activity, school)
 
-    ts_end   = long (datetime.strptime(end, "%Y-%m-%d").strftime("%s"))
-    ts_start = long (datetime.strptime(start, "%Y-%m-%d").strftime("%s"))
+    ts_end = long(datetime.strptime(end, "%Y-%m-%d").strftime("%s"))
+    ts_start = long(datetime.strptime(start, "%Y-%m-%d").strftime("%s"))
 
     log.info("\n\n")
     log.info("**************************************************************************************************************")
@@ -165,8 +163,9 @@ def activity_time (re, start, end, activity, school=None):
     log.info("**************************************************************************************************************")
     log.info("\n\n")
 
-def update_school  (re, machine_sn, school):
-    re.rep_update_school(machine_sn, school);
+
+def update_school(re, machine_sn, school):
+    re.rep_update_school(machine_sn, school)
 
     log.info("\n\n")
     log.info("**************************************************************************************************************")
@@ -178,21 +177,21 @@ def update_school  (re, machine_sn, school):
 
 
 def main():
-    re = DB_Stats (args.db_name, args.db_user, args.db_pass)
+    re = DB_Stats(args.db_name, args.db_user, args.db_pass)
     re.connect()
 
     if args.query == 'activity_time':
         activity_time(re, args.start_date, args.end_date, args.activity, args.school)
     elif args.query == 'desktops':
-        desktops (re, args.start_date, args.end_date, args.school,args.desktop);
+        desktops(re, args.start_date, args.end_date, args.school, args.desktop)
     elif args.query == 'activity_most_used':
-        activity_most_used(re, args.start_date, args.end_date, args.school, args.cant_max, args.desktop);
+        activity_most_used(re, args.start_date, args.end_date, args.school, args.cant_max, args.desktop)
     elif args.query == 'frequency_usage':
         frequency_usage(re, args.start_date, args.end_date, args.school)
     elif args.query == 'update_school':
         update_school(re, args.machine_sn, args.school)
     elif args.query == 'all':
-        activity_most_used(re, args.start_date, args.end_date,args.school);
+        activity_most_used(re, args.start_date, args.end_date, args.school)
         frequency_usage(re, args.start_date, args.end_date, args.school)
         activity_time(re, args.start_date, args.end_date, args.activity, args.school)
     else:
