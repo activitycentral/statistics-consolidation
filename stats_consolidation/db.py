@@ -1,9 +1,6 @@
 import logging
 from datetime import datetime
 
-import mysql.connector
-from mysql.connector import errorcode
-
 import sqlalchemy as sa
 from sqlalchemy.sql import func
 
