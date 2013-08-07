@@ -30,7 +30,7 @@ clean:
 
 COVERAGE=python ../.venv/bin/coverage run --source=../stats_consolidation,../sql
 
-DBOPTIONS=--db_name sc --db_user sc --db_pass sc
+DBOPTIONS=--db_name sc --db_user sc --db_pass sc --db_dialect postgres
 
 .coverage: dropdb createdb
 	$(COVERAGE)\
