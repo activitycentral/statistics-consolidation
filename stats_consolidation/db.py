@@ -157,7 +157,7 @@ class DB_Stats:
         for d in rrd.get_last_value_by_interval(data_type):
             info_sel = (rrd.get_user_hash(), rrd.get_name(), datetime.fromtimestamp(float(d[0])), data_type)
             try:
-                """Verify if this activity has an entry already at the same start_date"""
+                # Verify if this activity has an entry already at the same start_date
                 result_proxy = cursor.execute(select, info_sel)
                 result = result_proxy.fetchone()
 
@@ -270,7 +270,7 @@ class DB_Stats:
                 select_usage = "SELECT SUM(data) FROM Usages WHERE (resource_name = %s)  AND (start_date > %s) AND (start_date < %s) AND (data_type = %s) AND (user_hash = %s)"
 
                 log.debug('Activiy time by school: %s', school)
-                """ Get user hash from a School"""
+                #  Get user hash from a School
                 result1 = cursor1.execute("SELECT hash FROM Users WHERE school = %s", (school,))
                 user_hashes = result1.fetchall()
                 for user_hash in user_hashes:
@@ -322,14 +322,14 @@ class DB_Stats:
         try:
             if school != None:
                 log.debug('Most activiy used by school: %s', school)
-                """ Get user hash from a School"""
+                #  Get user hash from a School
                 result1 = cursor1.execute("SELECT hash FROM Users WHERE school = %s", (school,))
                 user_hashes = result1.fetchall()
-                """ Cursor for select resources from Uages table"""
+                #  Cursor for select resources from Uages table
                 select_usage = "SELECT SUM(data) FROM Usages WHERE (resource_name = %s) AND (start_date > %s) AND (start_date < %s) AND (data_type = 'active') AND (user_hash = %s)"
             else:
                 log.debug('Most activiy used')
-                """ Cursor for select resources from Uages table"""
+                #  Cursor for select resources from Uages table
                 select_usage = "SELECT SUM(data) FROM Usages WHERE (resource_name = %s) AND (start_date > %s) AND (start_date < %s) AND (data_type = 'active')"
 
             ts_start = self.date_to_ts(start)
@@ -373,7 +373,7 @@ class DB_Stats:
 
             if school != None:
                 log.debug('Frequency usage by school: %s', school)
-                """ Get user hash from a School"""
+                #  Get user hash from a School
                 result1 = cursor1.execute("SELECT hash FROM Users WHERE school = %s", (school,))
                 user_hashes = result1.fetchall()
 
