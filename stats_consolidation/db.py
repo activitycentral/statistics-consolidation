@@ -43,7 +43,7 @@ class DB_Stats:
         # "   `data` INTEGER NOT NULL,"
         # "   PRIMARY KEY (`user_hash`,`start_date`,`resource_name`, `data_type`)"
         # "   )"
-        Usages = sa.Table('Usages', metadata,
+        usages = sa.Table('usages', metadata,
             sa.Column('ts', sa.TIMESTAMP,
                 server_default=func.current_timestamp(),
                 server_onupdate=func.current_timestamp()),
@@ -59,7 +59,7 @@ class DB_Stats:
         # "   `name` CHAR(250),"
         # "   PRIMARY KEY (name)"
         # "   )"
-        Resources = sa.Table('Resources', metadata,
+        resources = sa.Table('resources', metadata,
             sa.Column('name', sa.CHAR(250), primary_key=True),
         )
 
@@ -74,7 +74,7 @@ class DB_Stats:
         # "   `ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,"
         # "   PRIMARY KEY (hash)"
         # "   )"
-        Users = sa.Table('Users', metadata,
+        users = sa.Table('users', metadata,
             sa.Column('hash', sa.CHAR(40), nullable=False, primary_key=True),
             sa.Column('uuid', sa.CHAR(32), nullable=False),
             sa.Column('machine_sn', sa.CHAR(80)),
@@ -90,7 +90,7 @@ class DB_Stats:
         # "CREATE TABLE Runs("
         # "   `last_ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP "
         # ")"
-        Runs = sa.Table('Runs', metadata,
+        runs = sa.Table('runs', metadata,
             sa.Column('last_ts', sa.TIMESTAMP,
                 server_default=func.current_timestamp(),
                 server_onupdate=func.current_timestamp()),
@@ -137,17 +137,17 @@ class DB_Stats:
         self.store_user(rrd)
 
         cursor = self.cnx.cursor()
-        select = ("SELECT * FROM Usages WHERE "
+        select = ("SELECT * FROM usages WHERE "
                 "user_hash = %s AND "
                 "resource_name = %s AND "
                 "start_date = %s AND "
                 "data_type = %s")
-        update = ("UPDATE Usages SET data = %s WHERE "
+        update = ("UPDATE usages SET data = %s WHERE "
                 "user_hash = %s AND "
                 "resource_name = %s AND "
                 "start_date = %s AND "
                 "data_type = %s")
-        insert = ("INSERT INTO Usages "
+        insert = ("INSERT INTO usages "
                 "(user_hash, "
                 "resource_name, "
                 "start_date, "
@@ -178,7 +178,7 @@ class DB_Stats:
 
     def store_resource(self, resource_name):
         cursor = self.cnx.cursor()
-        op = ("SELECT name FROM Resources WHERE name = %s")
+        op = ("SELECT name FROM resources WHERE name = %s")
         params = (resource_name,)
         try:
             result_proxy = cursor.execute(op, params)
@@ -186,7 +186,7 @@ class DB_Stats:
             if result != None:
                 log.debug('Resource %s already present in DB', resource_name)
             else:
-                insert = ("INSERT INTO Resources (name) VALUES (%s)")
+                insert = ("INSERT INTO resources (name) VALUES (%s)")
                 info = (resource_name, )
                 cursor.execute(insert, info)
                 self.cnx.commit()
@@ -196,7 +196,7 @@ class DB_Stats:
 
     def store_user(self, rrd):
         cursor = self.cnx.cursor()
-        op = ("SELECT hash FROM Users WHERE hash = %s")
+        op = ("SELECT hash FROM users WHERE hash = %s")
         params = (rrd.get_user_hash(), )
         try:
             result_proxy = cursor.execute(op, params)
@@ -204,7 +204,7 @@ class DB_Stats:
             if result != None:
                 log.debug('User %s already in DB', rrd.user_hash)
             else:
-                insert = ("INSERT INTO Users (hash, uuid, machine_sn, age, school, sw_version) VALUES (%s, %s, %s, %s, %s, %s)")
+                insert = ("INSERT INTO users (hash, uuid, machine_sn, age, school, sw_version) VALUES (%s, %s, %s, %s, %s, %s)")
                 params = (rrd.get_user_hash(), rrd.get_uuid(), rrd.get_sn(), rrd.get_age(), rrd.get_school(), "1.0.0")
                 cursor.execute(insert, params)
                 self.cnx.commit()
@@ -215,17 +215,17 @@ class DB_Stats:
     def update_last_record(self):
         cursor = self.cnx.cursor()
         res = 0
-        op = ("SELECT * FROM Runs")
+        op = ("SELECT * FROM runs")
         try:
             result_proxy = cursor.execute(op)
             result = result_proxy.fetchone()
 
             if result != None:
-                op = ("UPDATE Runs SET last_ts = CURRENT_TIMESTAMP")
+                op = ("UPDATE runs SET last_ts = CURRENT_TIMESTAMP")
                 cursor.execute(op)
                 self.cnx.commit()
             else:
-                op = ("INSERT INTO Runs VALUES(CURRENT_TIMESTAMP)")
+                op = ("INSERT INTO runs VALUES(CURRENT_TIMESTAMP)")
                 cursor.execute(op)
                 self.cnx.commit()
             log.info("Save last record")
@@ -267,11 +267,11 @@ class DB_Stats:
         cursor2 = self.cnx.cursor()
         try:
             if school != None:
-                select_usage = "SELECT SUM(data) FROM Usages WHERE (resource_name = %s)  AND (start_date > %s) AND (start_date < %s) AND (data_type = %s) AND (user_hash = %s)"
+                select_usage = "SELECT SUM(data) FROM usages WHERE (resource_name = %s)  AND (start_date > %s) AND (start_date < %s) AND (data_type = %s) AND (user_hash = %s)"
 
                 log.debug('Activiy time by school: %s', school)
                 #  Get user hash from a School
-                result1 = cursor1.execute("SELECT hash FROM Users WHERE school = %s", (school,))
+                result1 = cursor1.execute("SELECT hash FROM users WHERE school = %s", (school,))
                 user_hashes = result1.fetchall()
                 for user_hash in user_hashes:
                     log.debug('user Hash: %s', user_hash[0])
@@ -284,7 +284,7 @@ class DB_Stats:
                     uptime = float(result2.fetchone()[0]) + uptime
 
             else:
-                select_usage = "SELECT SUM(data) FROM Usages WHERE (resource_name = %s)  AND (start_date > %s) AND (start_date < %s) AND (data_type = %s)"
+                select_usage = "SELECT SUM(data) FROM usages WHERE (resource_name = %s)  AND (start_date > %s) AND (start_date < %s) AND (data_type = %s)"
                 params_focus = (activity, ts_start, ts_end, 'active')
                 params_uptime = (activity, ts_start, ts_end, 'uptime')
                 result2 = cursor2.execute(select_usage, params_focus)
@@ -311,11 +311,11 @@ class DB_Stats:
         cursor3 = self.cnx.cursor()
 
         if desktop == 'gnome':
-            result2 = cursor2.execute("SELECT name FROM Resources WHERE name REGEXP 'application'")
+            result2 = cursor2.execute("SELECT name FROM resources WHERE name REGEXP 'application'")
         elif desktop == 'sugar':
-            result2 = cursor2.execute("SELECT name FROM Resources WHERE name REGEXP 'activity'")
+            result2 = cursor2.execute("SELECT name FROM resources WHERE name REGEXP 'activity'")
         else:
-            result2 = cursor2.execute("SELECT name FROM Resources")
+            result2 = cursor2.execute("SELECT name FROM resources")
 
         resources = result2.fetchall()
 
@@ -323,14 +323,14 @@ class DB_Stats:
             if school != None:
                 log.debug('Most activiy used by school: %s', school)
                 #  Get user hash from a School
-                result1 = cursor1.execute("SELECT hash FROM Users WHERE school = %s", (school,))
+                result1 = cursor1.execute("SELECT hash FROM users WHERE school = %s", (school,))
                 user_hashes = result1.fetchall()
                 #  Cursor for select resources from Uages table
-                select_usage = "SELECT SUM(data) FROM Usages WHERE (resource_name = %s) AND (start_date > %s) AND (start_date < %s) AND (data_type = 'active') AND (user_hash = %s)"
+                select_usage = "SELECT SUM(data) FROM usages WHERE (resource_name = %s) AND (start_date > %s) AND (start_date < %s) AND (data_type = 'active') AND (user_hash = %s)"
             else:
                 log.debug('Most activiy used')
                 #  Cursor for select resources from Uages table
-                select_usage = "SELECT SUM(data) FROM Usages WHERE (resource_name = %s) AND (start_date > %s) AND (start_date < %s) AND (data_type = 'active')"
+                select_usage = "SELECT SUM(data) FROM usages WHERE (resource_name = %s) AND (start_date > %s) AND (start_date < %s) AND (data_type = 'active')"
 
             ts_start = self.date_to_ts(start)
             ts_end = self.date_to_ts(end)
@@ -374,19 +374,19 @@ class DB_Stats:
             if school != None:
                 log.debug('Frequency usage by school: %s', school)
                 #  Get user hash from a School
-                result1 = cursor1.execute("SELECT hash FROM Users WHERE school = %s", (school,))
+                result1 = cursor1.execute("SELECT hash FROM users WHERE school = %s", (school,))
                 user_hashes = result1.fetchall()
 
                 for user_hash in user_hashes:
-                    result2 = cursor2.execute("SELECT SUM(data) FROM Usages WHERE (resource_name = 'system') AND (start_date > %s) AND (start_date < %s) AND (data_type = 'uptime') AND (user_hash = %s)", (ts_start, ts_end, user_hash[0]))
+                    result2 = cursor2.execute("SELECT SUM(data) FROM usages WHERE (resource_name = 'system') AND (start_date > %s) AND (start_date < %s) AND (data_type = 'uptime') AND (user_hash = %s)", (ts_start, ts_end, user_hash[0]))
                     res = result2.fetchone()
                     if res != None and res[0] != None:
                         time = float(res[0]) + time
             else:
                 log.debug('Frequency usage')
-                result1 = cursor1.execute("SELECT hash FROM Users")
+                result1 = cursor1.execute("SELECT hash FROM users")
                 user_hashes = result1.fetchall()
-                result2 = cursor2.execute("SELECT SUM(data) FROM Usages WHERE (resource_name = 'system') AND (start_date > %s) AND (start_date < %s) AND (data_type = 'uptime')", (ts_start, ts_end))
+                result2 = cursor2.execute("SELECT SUM(data) FROM usages WHERE (resource_name = 'system') AND (start_date > %s) AND (start_date < %s) AND (data_type = 'uptime')", (ts_start, ts_end))
                 time = result2.fetchone()[0]
 
             return (time, len(user_hashes))
@@ -398,7 +398,7 @@ class DB_Stats:
         cursor = self.cnx.cursor()
         try:
             log.debug("Set school name: %s to user with machine_sn: %s", school, machine_sn)
-            cursor.execute("UPDATE Users SET school = %s WHERE machine_sn = %s", (school, machine_sn))
+            cursor.execute("UPDATE users SET school = %s WHERE machine_sn = %s", (school, machine_sn))
         except sa.exc.DBAPIError as err:
             log.error("Database on %s: %s", 'cursor.statement', err)
         else:
