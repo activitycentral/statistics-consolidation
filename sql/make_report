@@ -44,9 +44,7 @@ parser.add_argument('--desktop', required=False)
 
 args = parser.parse_args()
 
-"""
-_LOG_FORMAT = '[%(asctime)s]-%(levelname)s-\'%(name)s\': %(message)s'
-"""
+# _LOG_FORMAT = '[%(asctime)s]-%(levelname)s-\'%(name)s\': %(message)s'
 _LOG_FORMAT = '%(message)s'
 
 if args.log_level == 'debug':
