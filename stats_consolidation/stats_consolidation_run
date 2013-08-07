@@ -19,7 +19,8 @@ import argparse
 import ConfigParser
 import logging
 import logging.handlers
-import sys, os
+import sys
+import os
 
 # FIXME: Use relative import or change path
 basedir = os.path.dirname(os.path.dirname(__file__))
@@ -36,17 +37,17 @@ parser.add_argument('--config_file', required=False)
 args = parser.parse_args()
 
 
-_LOG_FORMAT='[%(asctime)s]-%(levelname)s-\'%(filename)s\': %(message)s'
-_LOG_LEVEL = {  'debug': logging.DEBUG,
+_LOG_FORMAT = '[%(asctime)s]-%(levelname)s-\'%(filename)s\': %(message)s'
+_LOG_LEVEL = {'debug': logging.DEBUG,
             'info': logging.INFO,
             'warning': logging.WARNING,
             'error': logging.ERROR,
             'critical': logging.CRITICAL}
 
-log=None
+log = None
+
 
 def main():
-
     config = ConfigParser.ConfigParser()
     if (args.config_file == None):
         config_file = "/etc/stats-consolidation.conf"
@@ -62,7 +63,7 @@ def main():
     db_pass = config.get('main', 'db_pass')
     rrd_path = config.get('main', 'rrd_path')
 
-    LOG_FILENAME = os.path.join(log_path,'stats-consolidation.log')
+    LOG_FILENAME = os.path.join(log_path, 'stats-consolidation.log')
     # Add the log message handler to the logger
     handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=10000000, backupCount=5)
     handler.setFormatter(logging.Formatter(fmt=_LOG_FORMAT))
@@ -77,11 +78,10 @@ def main():
     log.info('**************************************')
 
     try:
-        db = DB_Stats (db_name, db_user, db_pass)
+        db = DB_Stats(db_name, db_user, db_pass)
         db.create()
     except Exception as e:
         log.warning('Creating DB: %s', str(e))
-
 
     try:
         con = Consolidation(rrd_path, db)
@@ -93,7 +93,6 @@ def main():
         log.info('**************************************')
     except Exception as e:
         log.warning('Processing rrd file: %s', str(e))
-
 
 
 if __name__ == '__main__':
