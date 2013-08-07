@@ -316,9 +316,9 @@ class DB_Stats:
         cursor3 = self.cnx.cursor()
 
         if desktop == 'gnome':
-            result2 = cursor2.execute("SELECT name FROM resources WHERE name REGEXP 'application'")
+            result2 = cursor2.execute("SELECT name FROM resources WHERE name LIKE 'application'")
         elif desktop == 'sugar':
-            result2 = cursor2.execute("SELECT name FROM resources WHERE name REGEXP 'activity'")
+            result2 = cursor2.execute("SELECT name FROM resources WHERE name LIKE 'activity'")
         else:
             result2 = cursor2.execute("SELECT name FROM resources")
 
