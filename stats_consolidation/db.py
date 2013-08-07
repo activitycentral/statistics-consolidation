@@ -164,11 +164,16 @@ class DB_Stats:
 
                 if result != None:
                     log.info('Update %s \'%s\' entry for resource \'%s\' ', data_type, d[1], rrd.get_name())
-                    info_up = (d[1], rrd.get_user_hash(), rrd.get_name(), datetime.fromtimestamp(float(d[0])), data_type)
+                    data = int(float(d[1]))
+                    info_up = (data, rrd.get_user_hash(), rrd.get_name(),
+                               datetime.fromtimestamp(float(d[0])), data_type)
                     cursor.execute(update, info_up)
                 else:
                     log.info('New %s \'%s\' entry for resource \'%s\'', data_type, d[1], rrd.get_name())
-                    info_ins = (rrd.get_user_hash(), rrd.get_name(), datetime.fromtimestamp(float(d[0])), data_type, d[1])
+                    data = int(float(d[1]))
+                    info_ins = (rrd.get_user_hash(), rrd.get_name(),
+                                datetime.fromtimestamp(float(d[0])), data_type,
+                                data)
                     cursor.execute(insert, info_ins)
 
                 self.cnx.commit()
