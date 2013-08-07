@@ -37,62 +37,62 @@ args = parser.parse_args()
 
 
 _LOG_FORMAT='[%(asctime)s]-%(levelname)s-\'%(filename)s\': %(message)s'
-_LOG_LEVEL = {	'debug': logging.DEBUG,
-          	'info': logging.INFO,
-          	'warning': logging.WARNING,
-          	'error': logging.ERROR,
-          	'critical': logging.CRITICAL}
+_LOG_LEVEL = {  'debug': logging.DEBUG,
+            'info': logging.INFO,
+            'warning': logging.WARNING,
+            'error': logging.ERROR,
+            'critical': logging.CRITICAL}
 
 log=None
 
 def main():
 
-	config = ConfigParser.ConfigParser()
-	if (args.config_file == None):
-		config_file = "/etc/stats-consolidation.conf"
-	else:
-		config_file = args.config_file
+    config = ConfigParser.ConfigParser()
+    if (args.config_file == None):
+        config_file = "/etc/stats-consolidation.conf"
+    else:
+        config_file = args.config_file
 
-	config.read(config_file)
+    config.read(config_file)
 
-	log_path = config.get('main', 'log_path')
-	log_level = config.get('main', 'log_level')
-	db_name = config.get('main', 'db_name')
-	db_user = config.get('main', 'db_user')
-	db_pass = config.get('main', 'db_pass')
-	rrd_path = config.get('main', 'rrd_path')
+    log_path = config.get('main', 'log_path')
+    log_level = config.get('main', 'log_level')
+    db_name = config.get('main', 'db_name')
+    db_user = config.get('main', 'db_user')
+    db_pass = config.get('main', 'db_pass')
+    rrd_path = config.get('main', 'rrd_path')
 
-	LOG_FILENAME = os.path.join(log_path,'stats-consolidation.log')
-	# Add the log message handler to the logger
-	handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=10000000, backupCount=5)
-	handler.setFormatter(logging.Formatter(fmt=_LOG_FORMAT))
-	handler.setLevel(_LOG_LEVEL[log_level])
+    LOG_FILENAME = os.path.join(log_path,'stats-consolidation.log')
+    # Add the log message handler to the logger
+    handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=10000000, backupCount=5)
+    handler.setFormatter(logging.Formatter(fmt=_LOG_FORMAT))
+    handler.setLevel(_LOG_LEVEL[log_level])
 
-	log = logging.getLogger("stats-consolidation")
-	log.setLevel(_LOG_LEVEL[log_level])
-	log.addHandler(handler)
+    log = logging.getLogger("stats-consolidation")
+    log.setLevel(_LOG_LEVEL[log_level])
+    log.addHandler(handler)
 
-	log.info('**************************************')
-	log.info('       Starting consolidation         ')
-	log.info('**************************************')
+    log.info('**************************************')
+    log.info('       Starting consolidation         ')
+    log.info('**************************************')
 
-	try:
-		db = DB_Stats (db_name, db_user, db_pass)
-		db.create()
-	except Exception as e:
-		log.warning('Creating DB: %s', str(e))
+    try:
+        db = DB_Stats (db_name, db_user, db_pass)
+        db.create()
+    except Exception as e:
+        log.warning('Creating DB: %s', str(e))
 
 
-	try:
-		con = Consolidation(rrd_path, db)
-		con.process_rrds()
-		db.close()
+    try:
+        con = Consolidation(rrd_path, db)
+        con.process_rrds()
+        db.close()
 
-		log.info('**************************************')
-		log.info('       Finish consolidation           ')
-		log.info('**************************************')
-	except Exception as e:
-		log.warning('Processing rrd file: %s', str(e))
+        log.info('**************************************')
+        log.info('       Finish consolidation           ')
+        log.info('**************************************')
+    except Exception as e:
+        log.warning('Processing rrd file: %s', str(e))
 
 
 
