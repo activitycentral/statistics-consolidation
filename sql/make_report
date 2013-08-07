@@ -50,9 +50,9 @@ _LOG_FORMAT='[%(asctime)s]-%(levelname)s-\'%(name)s\': %(message)s'
 _LOG_FORMAT='%(message)s'
 
 if args.log_level == 'debug':
-	log_level = logging.DEBUG
+    log_level = logging.DEBUG
 else:
-	log_level = logging.INFO
+    log_level = logging.INFO
 
 
 log = logging.getLogger(__name__)
@@ -68,137 +68,137 @@ logging.getLogger('sugar_stats_consolidation.rrd_files').setLevel(log_level)
 
 
 def desktops (re, start, end, school=None, desktop='any'):
-	activity = re.rep_get_activities(start, end, school, desktop)
-	
-	log.info("\n\n")
-	log.info("**************************************************************************************************************")
-	log.info("                                     Most Activity/ies used                                                       ")
-	log.info('SCHOOL:   %s', school)
-	log.info('DESKTOP:  %s', desktop)
-	log.info('INTERVAL: %s-> %s', start, end)
-	if len(activity) > 0:
-		log.info("")
-		i = 0
-		total = 0
-		while i < len (activity):
-			total = activity[i][1] + total
-			i=i+1
-			
+    activity = re.rep_get_activities(start, end, school, desktop)
 
-		log.info('TOTAL: %.1f hrs / %.2f mins / %.2f secs', (total/60/60), (total/60), total)
-	else:
-		log.info("No activity found for desktop %s!!", desktop)	
-	log.info("***************************************************************************************************************")
-	log.info("\n\n")
+    log.info("\n\n")
+    log.info("**************************************************************************************************************")
+    log.info("                                     Most Activity/ies used                                                       ")
+    log.info('SCHOOL:   %s', school)
+    log.info('DESKTOP:  %s', desktop)
+    log.info('INTERVAL: %s-> %s', start, end)
+    if len(activity) > 0:
+        log.info("")
+        i = 0
+        total = 0
+        while i < len (activity):
+            total = activity[i][1] + total
+            i=i+1
+
+
+        log.info('TOTAL: %.1f hrs / %.2f mins / %.2f secs', (total/60/60), (total/60), total)
+    else:
+        log.info("No activity found for desktop %s!!", desktop)
+    log.info("***************************************************************************************************************")
+    log.info("\n\n")
 
 
 
 
 def activity_most_used(re, start, end, school=None, cant_max=None, desktop='any'):
-	activity = re.rep_get_activities(start, end, school, desktop)
+    activity = re.rep_get_activities(start, end, school, desktop)
 
-	log.info("\n\n")
-	log.info("**************************************************************************************************************")
-	log.info("                                     Most Activity/ies used                                                       ")
-	log.info('SCHOOL:   %s', school)
-	log.info('DESKTOP:  %s', desktop)
-	log.info('INTERVAL: %s-> %s', start, end)
-	if (cant_max == None) and (len(activity) > 0):
-		log.info('NAME:     %s', activity[0][0])
-		log.info('TIME:     %.1f hrs / %.2f mins / %.2f secs', (activity[0][1]/60/60), (activity[0][1]/60), activity[0][1])
-	elif (cant_max != None) and (len(activity) > 0):
-		log.info("")
-		i = 0
-		while (i < len (activity)) and (i < int(cant_max)):
-			log.info('%s) %s: %.1f hrs / %.2f mins / %.2f secs', 
-									i+1,
-									activity[i][0], 
-									(activity[i][1]/60/60), 
-									(activity[i][1]/60), 
-									activity[i][1])
-			i=i+1
-	else:
-		log.info("No activity found !!")	
-	log.info("***************************************************************************************************************")
-	log.info("\n\n")
+    log.info("\n\n")
+    log.info("**************************************************************************************************************")
+    log.info("                                     Most Activity/ies used                                                       ")
+    log.info('SCHOOL:   %s', school)
+    log.info('DESKTOP:  %s', desktop)
+    log.info('INTERVAL: %s-> %s', start, end)
+    if (cant_max == None) and (len(activity) > 0):
+        log.info('NAME:     %s', activity[0][0])
+        log.info('TIME:     %.1f hrs / %.2f mins / %.2f secs', (activity[0][1]/60/60), (activity[0][1]/60), activity[0][1])
+    elif (cant_max != None) and (len(activity) > 0):
+        log.info("")
+        i = 0
+        while (i < len (activity)) and (i < int(cant_max)):
+            log.info('%s) %s: %.1f hrs / %.2f mins / %.2f secs',
+                                    i+1,
+                                    activity[i][0],
+                                    (activity[i][1]/60/60),
+                                    (activity[i][1]/60),
+                                    activity[i][1])
+            i=i+1
+    else:
+        log.info("No activity found !!")
+    log.info("***************************************************************************************************************")
+    log.info("\n\n")
 
 def frequency_usage(re, start, end, school=None):
-	(fres, xos) = re.rep_frequency_usage(start, end, school);
+    (fres, xos) = re.rep_frequency_usage(start, end, school);
 
-	ts_end   = long (datetime.strptime(end, "%Y-%m-%d").strftime("%s"))
-	ts_start = long (datetime.strptime(start, "%Y-%m-%d").strftime("%s"))
+    ts_end   = long (datetime.strptime(end, "%Y-%m-%d").strftime("%s"))
+    ts_start = long (datetime.strptime(start, "%Y-%m-%d").strftime("%s"))
 
-	f_total = (fres / 60)
-	if xos != 0:
-		average = f_total / xos
-		average_x_day = average / ((ts_end - ts_start)/(60*60*24))
-	else:
-		average = 0
-		average_x_day = 0
-	log.info("\n\n")
-	log.info("**************************************************************************************************************")
-	log.info("                                     Fequency Usage                                                           ")
-	log.info('SCHOOL:               %s', school)
-	log.info('INTERVAL:             %s-> %s', start, end)
-	log.info('NUMBER OF XOs:        %s', xos)
-	log.info('TOTAL TIME (all XOs): %.2f min', (f_total))
-	log.info('AVERAGE per XO:       %.2f min/XOs', average)
-	log.info('AVERAGE per day:      %.2f min/XOs/day', average_x_day)
-	log.info("**************************************************************************************************************")
-	log.info("\n\n")
+    f_total = (fres / 60)
+    if xos != 0:
+        average = f_total / xos
+        average_x_day = average / ((ts_end - ts_start)/(60*60*24))
+    else:
+        average = 0
+        average_x_day = 0
+    log.info("\n\n")
+    log.info("**************************************************************************************************************")
+    log.info("                                     Fequency Usage                                                           ")
+    log.info('SCHOOL:               %s', school)
+    log.info('INTERVAL:             %s-> %s', start, end)
+    log.info('NUMBER OF XOs:        %s', xos)
+    log.info('TOTAL TIME (all XOs): %.2f min', (f_total))
+    log.info('AVERAGE per XO:       %.2f min/XOs', average)
+    log.info('AVERAGE per day:      %.2f min/XOs/day', average_x_day)
+    log.info("**************************************************************************************************************")
+    log.info("\n\n")
 
 def activity_time (re, start, end, activity, school=None):
-	time = re.rep_activity_time (start, end, activity, school);
-	
+    time = re.rep_activity_time (start, end, activity, school);
 
-	ts_end   = long (datetime.strptime(end, "%Y-%m-%d").strftime("%s"))
-	ts_start = long (datetime.strptime(start, "%Y-%m-%d").strftime("%s"))
 
-	log.info("\n\n")
-	log.info("**************************************************************************************************************")
-	log.info("                                     Activity Time                                                            ")  
-	log.info('NAME:     %s', activity)
-	log.info('SCHOOL:   %s', school)
-	log.info('INTERVAL: %s-> %s', start, end)
-	log.info('UPTIME:   %s secs', time[0])
-	log.info('FOCUS     %s secs', time[1])
-	log.info("**************************************************************************************************************")
-	log.info("\n\n")
+    ts_end   = long (datetime.strptime(end, "%Y-%m-%d").strftime("%s"))
+    ts_start = long (datetime.strptime(start, "%Y-%m-%d").strftime("%s"))
+
+    log.info("\n\n")
+    log.info("**************************************************************************************************************")
+    log.info("                                     Activity Time                                                            ")
+    log.info('NAME:     %s', activity)
+    log.info('SCHOOL:   %s', school)
+    log.info('INTERVAL: %s-> %s', start, end)
+    log.info('UPTIME:   %s secs', time[0])
+    log.info('FOCUS     %s secs', time[1])
+    log.info("**************************************************************************************************************")
+    log.info("\n\n")
 
 def update_school  (re, machine_sn, school):
-	re.rep_update_school(machine_sn, school);
-	
-	log.info("\n\n")
-	log.info("**************************************************************************************************************")
-	log.info("                                     Set School name to User                                                  ")  
-	log.info('SCHOOL:     %s', school)
-	log.info('MACHINE_SN: %s', machine_sn)
-	log.info("**************************************************************************************************************")
-	log.info("\n\n")
+    re.rep_update_school(machine_sn, school);
+
+    log.info("\n\n")
+    log.info("**************************************************************************************************************")
+    log.info("                                     Set School name to User                                                  ")
+    log.info('SCHOOL:     %s', school)
+    log.info('MACHINE_SN: %s', machine_sn)
+    log.info("**************************************************************************************************************")
+    log.info("\n\n")
 
 
 def main():
-	re = DB_Stats (args.db_name, args.db_user, args.db_pass)
-	re.connect()
-	
-	if args.query == 'activity_time':
-		activity_time(re, args.start_date, args.end_date, args.activity, args.school)
-	elif args.query == 'desktops':
-		desktops (re, args.start_date, args.end_date, args.school,args.desktop);
-	elif args.query == 'activity_most_used':
-		activity_most_used(re, args.start_date, args.end_date, args.school, args.cant_max, args.desktop);
-	elif args.query == 'frequency_usage':
-		frequency_usage(re, args.start_date, args.end_date, args.school)
-	elif args.query == 'update_school':
-		update_school(re, args.machine_sn, args.school)
-	elif args.query == 'all':
-		activity_most_used(re, args.start_date, args.end_date,args.school);
-		frequency_usage(re, args.start_date, args.end_date, args.school)
-		activity_time(re, args.start_date, args.end_date, args.activity, args.school)
-	else:
-		log.error("Query option unkwon: %s", args.query)
-		
-	re.close()
+    re = DB_Stats (args.db_name, args.db_user, args.db_pass)
+    re.connect()
+
+    if args.query == 'activity_time':
+        activity_time(re, args.start_date, args.end_date, args.activity, args.school)
+    elif args.query == 'desktops':
+        desktops (re, args.start_date, args.end_date, args.school,args.desktop);
+    elif args.query == 'activity_most_used':
+        activity_most_used(re, args.start_date, args.end_date, args.school, args.cant_max, args.desktop);
+    elif args.query == 'frequency_usage':
+        frequency_usage(re, args.start_date, args.end_date, args.school)
+    elif args.query == 'update_school':
+        update_school(re, args.machine_sn, args.school)
+    elif args.query == 'all':
+        activity_most_used(re, args.start_date, args.end_date,args.school);
+        frequency_usage(re, args.start_date, args.end_date, args.school)
+        activity_time(re, args.start_date, args.end_date, args.activity, args.school)
+    else:
+        log.error("Query option unkwon: %s", args.query)
+
+    re.close()
 
 if __name__ == '__main__':
     main()
