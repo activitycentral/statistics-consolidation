@@ -173,7 +173,7 @@ class DB_Stats:
                 self.cnx.commit()
 
             except sa.exc.DBAPIError as err:
-                log.error('MySQL on store_activiy_time()%s: %s %s', data_type, 'cursor.statement', err)
+                log.error('Database on store_activiy_time()%s: %s %s', data_type, 'cursor.statement', err)
 
     def store_resource(self, resource_name):
         cursor = self.cnx.cursor()
@@ -191,7 +191,7 @@ class DB_Stats:
                 self.cnx.commit()
                 log.info('New Resource %s stored in DB', resource_name)
         except sa.exc.DBAPIError as err:
-            log.error('MySQL on store_resource:  %s %s', 'cursor.statement', err)
+            log.error('Database on store_resource:  %s %s', 'cursor.statement', err)
 
     def store_user(self, rrd):
         cursor = self.cnx.cursor()
@@ -209,7 +209,7 @@ class DB_Stats:
                 self.cnx.commit()
                 log.debug('New User %s stored in DB', rrd.user_hash)
         except sa.exc.DBAPIError as err:
-            log.error('MySQL on store_user %s %s', 'cursor.statement', err)
+            log.error('Database on store_user %s %s', 'cursor.statement', err)
 
     def update_last_record(self):
         cursor = self.cnx.cursor()
@@ -229,7 +229,7 @@ class DB_Stats:
                 self.cnx.commit()
             log.info("Save last record")
         except sa.exc.DBAPIError as err:
-            log.error('MySQL on update_last_record: %s %s', 'cursor.statement', err)
+            log.error('Database on update_last_record: %s %s', 'cursor.statement', err)
             res = -1
 
         return res
@@ -247,7 +247,7 @@ class DB_Stats:
                 log.info('Last date record is None')
                 return 0
         except sa.exc.DBAPIError as err:
-            log.error('MySQL on get_date_last_record: %s %s', 'cursor.statement', err)
+            log.error('Database on get_date_last_record: %s %s', 'cursor.statement', err)
         except Exception as e:
             log.error(e)
             raise Exception("get_date_last_record: {0}".format(e))
@@ -295,10 +295,10 @@ class DB_Stats:
             return (uptime, focus)
 
         except sa.exc.DBAPIError as err:
-            log.error('MySQL on rep_activity_time %s', err)
+            log.error('Database on rep_activity_time %s', err)
 
         except Exception as e:
-            log.error('MySQL on rep_activity_time : %s', e)
+            log.error('Database on rep_activity_time : %s', e)
 
         return (None, None)
 
@@ -354,7 +354,7 @@ class DB_Stats:
                         res_list.append((resource[0], focus))
 
         except sa.exc.DBAPIError as err:
-            log.error('MySQL on most_activity_used %s', err)
+            log.error('Database on most_activity_used %s', err)
         except Exception as e:
             log.error('most_activity_used  Fail: %s', e)
         log.debug('Activities: %s', sorted(res_list, key=lambda x: x[1], reverse=True))
@@ -390,7 +390,7 @@ class DB_Stats:
             return (time, len(user_hashes))
 
         except sa.exc.DBAPIError as err:
-            log.error("MySQL on %s: %s", 'cursor.statement', err)
+            log.error("Database on %s: %s", 'cursor.statement', err)
 
     def rep_update_school(self, machine_sn, school):
         cursor = self.cnx.cursor()
@@ -398,7 +398,7 @@ class DB_Stats:
             log.debug("Set school name: %s to user with machine_sn: %s", school, machine_sn)
             cursor.execute("UPDATE Users SET school = %s WHERE machine_sn = %s", (school, machine_sn))
         except sa.exc.DBAPIError as err:
-            log.error("MySQL on %s: %s", 'cursor.statement', err)
+            log.error("Database on %s: %s", 'cursor.statement', err)
         else:
             self.cnx.commit()
 
