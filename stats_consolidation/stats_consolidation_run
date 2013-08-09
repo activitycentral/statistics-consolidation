@@ -88,6 +88,11 @@ def main():
         db.create()
     except Exception as e:
         log.warning('Creating DB: %s', str(e))
+        log.critical('Connecting: %s', e)
+        msg = 'Critical error trying to connect database:\n {error}\n'
+        error = str(e)
+        sys.stderr.write(msg.format(error=error))
+        sys.exit(1)
 
     try:
         con = Consolidation(rrd_path, db)
