@@ -1,0 +1,2 @@
+include INSTALL COPYING NEWS AUTHORS
+include stats-consolidation.conf stats-consolidation.cron
