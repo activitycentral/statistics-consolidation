@@ -5,7 +5,7 @@ MYSQL_CLI_0=mysql $(MYSQL_ARGS)
 MYSQL_CLI=mysql $(MYSQL_ARGS) sc
 MYSQL_DUMP=mysqldump $(MYSQL_ARGS) sc
 
-CMD=../stats_consolidation/stats_consolidation_run
+CMD=../stats_consolidation_run
 
 PIP=$(VIRTUAL_ENV)/bin/pip
 COVERAGE=python $(VIRTUAL_ENV)/bin/coverage run --source=../stats_consolidation,../sql
