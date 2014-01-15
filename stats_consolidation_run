@@ -51,7 +51,11 @@ def main():
     else:
         config_file = args.config_file
 
-    config.read(config_file)
+    fp = config.read(config_file)
+    if fp == []:
+        msg = "ERROR: %s config file couldn't be parsed\n" % config_file
+        sys.stderr.write(msg)
+        sys.exit(1)
 
     log_path = config.get('main', 'log_path')
     log_level = config.get('main', 'log_level')
