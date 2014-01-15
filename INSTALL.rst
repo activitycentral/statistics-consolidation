@@ -46,7 +46,7 @@ Install Instructions
 
   Then copy to default configuration path::
 
-      # cp stats-consolidation.conf /etc/stats-consolidation.conf
+      # cp deploy/stats-consolidation.conf /etc/stats-consolidation.conf
 
 
 4. Activate crontab.
