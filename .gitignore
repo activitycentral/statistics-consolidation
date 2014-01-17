@@ -2,3 +2,4 @@ build/
 logs/
 rrds/
 stats_consolidation/*.pyc
+stats_consolidation/build/*
