@@ -415,6 +415,8 @@ class DB_Stats:
 			cursor.execute ("UPDATE Users SET school = %s WHERE machine_sn = %s", (school, machine_sn))
 		except mysql.connector.Error as err:
 			log.error("MySQL on %s: %s", cursor.statement, err)
+		else:
+			self.cnx.commit()
 		
 		cursor.close()
 
