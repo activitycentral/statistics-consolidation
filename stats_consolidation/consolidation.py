@@ -37,7 +37,7 @@ class Consolidation:
 										self.db.store_activity_uptime(rrd_obj)
 										self.db.store_activity_focus_time(rrd_obj)
 									except Exception as e:
-										log.warning('Exception on RRD object instance: \'%s\'', e)
+										log.warning('Exception on RRD object instance (%s): \'%s\'', rrd, e)
 							else:
 								log.warning('RRD file not found: %s', os.path.join(self.base_path, id_hash, user_hash))
 					else:
