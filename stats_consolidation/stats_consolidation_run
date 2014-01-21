@@ -1,6 +1,8 @@
 #!/usr/bin/env  python
+# -*- coding: utf-8 -*-
 
 # Copyright (C) 2012, Gustavo Duarte
+# Copyright (C) 2013, Miguel González
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,81 +17,93 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import argparse 
+import argparse
 import ConfigParser
 import logging
 import logging.handlers
-import sys, os
+import sys
+import os
 
-from stats_consolidation.db import *
-from stats_consolidation.rrd_files import *
-from stats_consolidation.consolidation import *
+# FIXME: Use relative import or change path
+basedir = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(basedir)
 
-	
-parser = argparse.ArgumentParser()	
+from stats_consolidation.db import DB_Stats
+from stats_consolidation.consolidation import Consolidation
+
+
+parser = argparse.ArgumentParser()
 parser.add_argument('--config_file', required=False)
 
 args = parser.parse_args()
 
 
-_LOG_FORMAT='[%(asctime)s]-%(levelname)s-\'%(filename)s\': %(message)s'
-_LOG_LEVEL = {	'debug': logging.DEBUG,
-          	'info': logging.INFO,
-          	'warning': logging.WARNING,
-          	'error': logging.ERROR,
-          	'critical': logging.CRITICAL}
+_LOG_FORMAT = '[%(asctime)s]-%(levelname)s-\'%(filename)s\': %(message)s'
+_LOG_LEVEL = {'debug': logging.DEBUG,
+            'info': logging.INFO,
+            'warning': logging.WARNING,
+            'error': logging.ERROR,
+            'critical': logging.CRITICAL}
 
-log=None
+log = None
+
 
 def main():
+    config = ConfigParser.ConfigParser()
+    if (args.config_file == None):
+        config_file = "/etc/stats-consolidation.conf"
+    else:
+        config_file = args.config_file
 
-	config = ConfigParser.ConfigParser()
-	if (args.config_file == None):
-		config_file = "/etc/stats-consolidation.conf"	
-	else:
-		config_file = args.config_file
+    config.read(config_file)
 
-	config.read(config_file)
+    log_path = config.get('main', 'log_path')
+    log_level = config.get('main', 'log_level')
+    db_name = config.get('main', 'db_name')
+    db_user = config.get('main', 'db_user')
+    db_pass = config.get('main', 'db_pass')
+    rrd_path = config.get('main', 'rrd_path')
 
-	log_path = config.get('main', 'log_path') 
-	log_level = config.get('main', 'log_level')  
-	db_name = config.get('main', 'db_name')
-	db_user = config.get('main', 'db_user') 
-	db_pass = config.get('main', 'db_pass')
-	rrd_path = config.get('main', 'rrd_path')
-	
-	LOG_FILENAME = os.path.join(log_path,'stats-consolidation.log')
-	# Add the log message handler to the logger
-	handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=10000000, backupCount=5)
-	handler.setFormatter(logging.Formatter(fmt=_LOG_FORMAT))
-	handler.setLevel(_LOG_LEVEL[log_level])
-	
-	log = logging.getLogger("stats-consolidation")
-	log.setLevel(_LOG_LEVEL[log_level])
-	log.addHandler(handler)
-	
-	log.info('**************************************')
-	log.info('       Starting consolidation         ')
-	log.info('**************************************')
-	
-	try:
-		db = DB_Stats (db_name, db_user, db_pass)
-		db.create()
-	except Exception as e:
-		log.warning('Creating DB: %s', str(e))
+    try:
+        dialect = config.get('main', 'db_dialect')
+    except ConfigParser.NoOptionError:
+        dialect = None
 
+    LOG_FILENAME = os.path.join(log_path, 'stats-consolidation.log')
+    # Add the log message handler to the logger
+    handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=10000000, backupCount=5)
+    handler.setFormatter(logging.Formatter(fmt=_LOG_FORMAT))
+    handler.setLevel(_LOG_LEVEL[log_level])
 
-	try:
-		con = Consolidation(rrd_path, db)
-		con.process_rrds()
-		db.close()
-	
-		log.info('**************************************')
-		log.info('       Finish consolidation           ')
-		log.info('**************************************')
-	except Exception as e:
-		log.warning('Processing rrd file: %s', str(e))
+    log = logging.getLogger("stats-consolidation")
+    log.setLevel(_LOG_LEVEL[log_level])
+    log.addHandler(handler)
 
+    log.info('**************************************')
+    log.info('       Starting consolidation         ')
+    log.info('**************************************')
+
+    try:
+        db = DB_Stats(db_name, db_user, db_pass, dialect)
+        db.create()
+    except Exception as e:
+        log.warning('Creating DB: %s', str(e))
+        log.critical('Connecting: %s', e)
+        msg = 'Critical error trying to connect database:\n {error}\n'
+        error = str(e)
+        sys.stderr.write(msg.format(error=error))
+        sys.exit(1)
+
+    try:
+        con = Consolidation(rrd_path, db)
+        con.process_rrds()
+        db.close()
+
+        log.info('**************************************')
+        log.info('       Finish consolidation           ')
+        log.info('**************************************')
+    except Exception as e:
+        log.warning('Processing rrd file: %s', str(e))
 
 
 if __name__ == '__main__':

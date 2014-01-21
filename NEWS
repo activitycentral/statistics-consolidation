@@ -1,0 +1,19 @@
+2013-08-08  Miguel González  <migonzalvar@activitycentral.com>
+
+	* setup.py: Bump to 2.0 version because there are substantial changes
+	that affect major aspects of stats_consolidation usage.
+
+	* stats_consolidation/db.py: Uses SQLAlchemy library to interact with
+	database. This allows to change database driver to any supported by
+	SQLAlchemy itself.
+
+	Some changes are due to portability issues:
+
+	- change table name to lower case
+	- conversion to Unix epoch in Python
+	- use appropriate types in queries
+
+	* sql/make_report: Add --db_dialect optional argument.
+
+	* stats_consolidation/stats_consolidation_run: Add an optional
+	configuration entry db_dialect.

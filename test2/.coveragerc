@@ -1,0 +1,4 @@
+[report]
+exclude_lines =
+    except mysql
+    pragma: no cover
