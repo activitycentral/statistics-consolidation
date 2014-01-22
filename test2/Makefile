@@ -12,6 +12,13 @@ COVERAGE=python $(VIRTUAL_ENV)/bin/coverage run --source=../stats_consolidation,
 
 ALL: requirements coverage
 
+generate-rrd:
+	for xml in $$( find rrd/ -type f -name '*.xml' ); do \
+		rrdfile="`dirname $$xml`/`basename $$xml .xml`" ; \
+		rm -f $$rrdfile ; \
+		rrdtool restore $$xml $$rrdfile ; \
+	done
+
 requirements:
 	@[ $(VIRTUAL_ENV) ] || { echo "Please, run it inside a virtualenv"; exit 1; }
 	@[ -n "`$(PIP) show coverage`" ] || { echo "coverage not installed"; exit 1; }
@@ -27,7 +34,7 @@ crc:
 	$(MYSQL_CLI) --batch < crc.sql > crc_test.txt
 	diff crc_test.txt crc.txt
 
-run:
+run: generate-rrd
 	$(CMD) --config_file test.conf
 
 test: dropdb createdb run crc
@@ -41,7 +48,7 @@ clean:
 
 DBOPTIONS=--db_name sc --db_user sc --db_pass sc --db_dialect postgres
 
-.coverage: dropdb createdb
+.coverage: dropdb createdb generate-rrd
 	$(COVERAGE) $(CMD) --config_file test.conf
 	$(COVERAGE) $(CMD) --config_file test.conf
 	$(COVERAGE) -a\
