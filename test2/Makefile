@@ -41,6 +41,7 @@ test: dropdb createdb run crc
 
 clean:
 	rm -rf log/*
+	rm -rf rrd/*/*/*.rrd
 	rm -f crc_test.txt
 	rm -f .coverage
 	rm -rf htmlcov/
