@@ -11,14 +11,24 @@ class Config():
             sys.stderr.write(msg)
             sys.exit(1)
 
+        # Logging
         self.log_path = config.get('main', 'log_path')
         self.log_level = config.get('main', 'log_level')
-        self.db_name = config.get('main', 'db_name')
-        self.db_user = config.get('main', 'db_user')
-        self.db_pass = config.get('main', 'db_pass')
-        self.rrd_path = config.get('main', 'rrd_path')
 
+        # Database
+        self.db_name = config.get('main', 'db_name')
+        try:
+            self.db_user = config.get('main', 'db_user')
+        except ConfigParser.NoOptionError:
+            self.db_user = None
+        try:
+            self.db_pass = config.get('main', 'db_pass')
+        except ConfigParser.NoOptionError:
+            self.db_pass = None
         try:
             self.dialect = config.get('main', 'db_dialect')
         except ConfigParser.NoOptionError:
-            self.dialect = None
+            self.dialect = 'mysql+mysqlconnector'
+
+        # RRD
+        self.rrd_path = config.get('main', 'rrd_path')
