@@ -24,7 +24,27 @@ except IOError as e:
 
 config = Config(args.config_file)
 
-db = DB_Stats(config.db_name, config.db_user, config.db_pass)
+db = DB_Stats(config.db_name, config.db_user, config.db_pass, config.db_dialect)
+db.create()
+
+connection = db.connect()
+cursor = connection.cursor()
+result = cursor.execute("""SELECT
+    usages.ts usages_ts,
+    usages.user_hash usages_user_hash,
+    usages.resource_name usages_resource_name,
+    usages.start_date usages_start_date,
+    usages.data_type usages_data_type,
+    usages.data usages_data,
+    users.hash users_hash,
+    users.uuid users_uuid,
+    users.machine_sn users_machine_sn,
+    users.age users_age,
+    users.school users_school,
+    users.sw_version users_sw_version,
+    users.ts users_ts
+FROM usages LEFT JOIN users ON (usages.user_hash = users.hash)""")
+
 
 cols = [
     'usages_ts',
@@ -43,3 +63,8 @@ cols = [
 ]
 
 sys.stdout.write(','.join(cols) + '\n')
+
+for row in result:
+    sys.stdout.write(','.join([str(cell) for cell in row]) + '\n')
+
+connection.close()
