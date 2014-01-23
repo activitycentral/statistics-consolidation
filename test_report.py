@@ -7,6 +7,13 @@ BASEDIR = os.path.dirname(__file__)
 CMD = 'stats_consolidation_report'
 DEFAULT_CONFIG_FILE = "/etc/stats-consolidation.conf"
 
+CONFIG = """[main]
+db_name={db_name}
+db_dialect=sqlite
+log_path={log_path}
+log_level=debug
+rrd_path={rrd_path}
+"""
 
 def test_run_without_args_no_config_exist():
     # When I execute the script without arguments
@@ -32,12 +39,17 @@ def test_run_with_conf_file_args_that_not_exits():
 
 def test_run_with_conf_file_to_blank_database_outputs_headers():
     # When I execute with a blank database
-    conf_file = tempfile.NamedTemporaryFile()
+    conf_file = tempfile.NamedTemporaryFile(delete=False)
+    db_name = tempfile.NamedTemporaryFile().name
+    _, log_path = tempfile.mkstemp()
+    _, rrd_path = tempfile.mkstemp()
+    options = dict(db_name=db_name, log_path=log_path, rrd_path=log_path)
+    conf_file.write(CONFIG.format(**options))
+    conf_file.close()
 
     args = [os.path.join(BASEDIR, CMD), '--config_file', conf_file.name]
     output = subprocess.check_output(args)
 
-    conf_file.close()
 
     # Then prints one line with the header
     lines = output.strip().split('\n')
