@@ -1,5 +1,38 @@
 #!/usr/bin/env python
 
+import argparse
 import sys
 
-sys.exit(1)
+
+DEFAULT_CONFIG_FILE = "/etc/stats-consolidation.conf"
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--config_file', default=DEFAULT_CONFIG_FILE)
+
+args = parser.parse_args()
+
+try:
+    config = open(args.config_file)
+except IOError as e:
+    msg = str(e) + '\n'
+    sys.stderr.write(msg)
+    sys.exit(1)
+
+cols = [
+    'usages_ts',
+    'usages_user_hash',
+    'usages_resource_name',
+    'usages_start_date',
+    'usages_data_type',
+    'usages_data',
+    'users_hash',
+    'users_uuid',
+    'users_machine_sn',
+    'users_age',
+    'users_school',
+    'users_sw_version',
+    'users_ts',
+]
+
+sys.stdout.write(','.join(cols) + '\n')
