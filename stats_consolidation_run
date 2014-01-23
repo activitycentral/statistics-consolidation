@@ -67,7 +67,7 @@ def main():
     log.info('**************************************')
 
     try:
-        db = DB_Stats(config.db_name, config.db_user, config.db_pass, config.dialect)
+        db = DB_Stats(config.db_name, config.db_user, config.db_pass, config.db_dialect)
         db.create()
     except Exception as e:
         log.warning('Creating DB: %s', str(e))

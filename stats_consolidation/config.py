@@ -26,9 +26,9 @@ class Config():
         except ConfigParser.NoOptionError:
             self.db_pass = None
         try:
-            self.dialect = config.get('main', 'db_dialect')
+            self.db_dialect = config.get('main', 'db_dialect')
         except ConfigParser.NoOptionError:
-            self.dialect = 'mysql+mysqlconnector'
+            self.db_dialect = 'mysql+mysqlconnector'
 
         # RRD
         self.rrd_path = config.get('main', 'rrd_path')
