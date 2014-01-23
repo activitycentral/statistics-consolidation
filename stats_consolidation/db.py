@@ -4,8 +4,27 @@ import time
 
 import sqlalchemy as sa
 from sqlalchemy.sql import func
+import os.path
 
 log = logging.getLogger("stats-consolidation")
+
+
+def _to_url(dialect, **kwargs):
+    """ From keywords to a database URL.
+
+    >>> _to_url(dialect='sqlite', db_name='/tmp/database')
+    'sqlite:////tmp/database'
+    >>> _to_url(dialect='postgres', db_name='database', db_user='user', db_pass='secret')
+    'postgres://user:secret@localhost/database'
+
+    """
+    if dialect == 'sqlite':
+        path_to_file = os.path.abspath(kwargs['db_name'])
+        url = "sqlite:///" + path_to_file
+    else:
+        url =  "{dialect}://{db_user}:{db_pass}@localhost/{db_name}"
+        url = url.format(dialect=dialect, **kwargs)
+    return url
 
 
 class Connection(object):
@@ -25,11 +44,9 @@ class Connection(object):
 
 class DB_Stats:
     def __init__(self,  db_name, user, password, dialect=None):
-        self.db_name = db_name
-        self.user = user
-        self.password = password
+        dialect = dialect or 'mysql+mysqlconnector'
+        self.database_url = _to_url(dialect=dialect, db_name=db_name, db_user=user, db_pass=password)
         self.cnx = None
-        self.dialect = dialect or 'mysql+mysqlconnector'
 
     def _metadata(self):
         metadata = sa.MetaData()
@@ -110,13 +127,7 @@ class DB_Stats:
         self.cnx.close()
 
     def _get_engine(self):
-        database_url = '{dialect}://{user}:{password}@localhost/{db_name}'
-        engine = sa.create_engine(database_url.format(
-            dialect=self.dialect,
-            user=self.user,
-            password=self.password,
-            db_name=self.db_name)
-        )
+        engine = sa.create_engine(self.database_url)
         return engine
 
     def connect(self):
