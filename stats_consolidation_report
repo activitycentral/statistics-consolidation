@@ -3,6 +3,9 @@
 import argparse
 import sys
 
+from stats_consolidation.config import Config
+from stats_consolidation.db import DB_Stats
+
 
 DEFAULT_CONFIG_FILE = "/etc/stats-consolidation.conf"
 
@@ -18,6 +21,10 @@ except IOError as e:
     msg = str(e) + '\n'
     sys.stderr.write(msg)
     sys.exit(1)
+
+config = Config(args.config_file)
+
+db = DB_Stats(config.db_name, config.db_user, config.db_pass)
 
 cols = [
     'usages_ts',
