@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name="stats_consolidation",
-    version="2.0",
+    version="2.1",
     description="Statistics translator from rrd to relational db",
     author="Gustavo Duarte",
     author_email="gduarte@activitycentral.com",
@@ -12,7 +12,7 @@ setup(
     maintainer_email="migonzalvar@activitycentral.com",
     url="http://www.activitycentral.com/",
 
-    scripts=['stats_consolidation_run',],
+    scripts=['stats_consolidation_run', 'stats_consolidation_report', ],
     packages=[
         'stats_consolidation',
     ],
