@@ -1,2 +1,2 @@
-include INSTALL COPYING NEWS AUTHORS
+include INSTALL.rst README.rst COPYING NEWS AUTHORS
 include deploy/stats-consolidation.conf deploy/stats-consolidation.cron

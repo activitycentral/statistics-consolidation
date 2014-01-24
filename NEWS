@@ -1,3 +1,29 @@
+2014-01-24  Miguel González  <migonzalvar@activitycentral.com>
+
+    Bump to version 2.1.2.
+
+    * Fix install issue.
+
+
+2014-01-24  Miguel González  <migonzalvar@activitycentral.com>
+
+    Bump to version 2.1.1.
+
+    * Add a long description.
+
+
+2014-01-24  Miguel González  <migonzalvar@activitycentral.com>
+
+    Bump to version 2.1.
+
+    * New stats_consolidation_report script to dump database contents to a CSV
+      file.
+
+    * Added support to SQLite databases.
+
+    * Reorganize files.
+
+
 2013-08-08  Miguel González  <migonzalvar@activitycentral.com>
 
 	* setup.py: Bump to 2.0 version because there are substantial changes
