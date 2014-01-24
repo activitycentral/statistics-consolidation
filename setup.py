@@ -12,7 +12,7 @@ setup(
     maintainer_email="migonzalvar@activitycentral.com",
     url="http://www.activitycentral.com/",
 
-    scripts=['stats_consolidation_run',],
+    scripts=['stats_consolidation_run', 'stats_consolidation_report', ],
     packages=[
         'stats_consolidation',
     ],
